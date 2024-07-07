@@ -5,5 +5,5 @@
 ## Installation
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh | bash
 ```
