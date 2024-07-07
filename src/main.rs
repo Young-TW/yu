@@ -1,4 +1,5 @@
 mod env;
+mod syntax;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -26,13 +27,10 @@ fn install(manager: String, package: String) {
     }
 
     println!("Installing package: {}", package);
-    // // install package using package manager
-    // std::process::Command::new(manager)
-    //     .arg("install")
-    //     .arg(package)
-    //     .status()
-    //     .expect("Failed to execute command");
-    // 0;
+    // install package using package manager
+    let mut cmd: std::process::Command = syntax::gen_install_syntax(manager);
+    cmd.output().expect("Failed to execute command");
+    0;
 }
 
 fn uninstall(manager: String, package: String) {
@@ -47,8 +45,12 @@ fn uninstall(manager: String, package: String) {
 
 fn upgrade(manager: String) {
     // update
-
+    println!("Upgrading system");
+    let mut update_cmd: std::process::Command = syntax::gen_upgrade_syntax(manager.clone());
+    update_cmd.output().expect("Failed to execute command");
     // upgrade
-
+    let mut upgrade_cmd: std::process::Command = syntax::gen_upgrade_syntax(manager.clone());
+    upgrade_cmd.output().expect("Failed to execute command");
+    println!("System upgraded");
     0;
 }
