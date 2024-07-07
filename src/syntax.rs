@@ -1,6 +1,8 @@
 pub fn gen_install_syntax(manager: String) -> std::process::Command {
-    let command: std::process::Command = std::process::Command::new(manager);
+    let mut command: std::process::Command = std::process::Command::new(manager);
     // add arguments
+    command.arg("install");
+    command.arg("-y");
     command
 }
 
