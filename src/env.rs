@@ -1,7 +1,5 @@
-use std::env;
-
-fn detect_package_manager() -> String {
-    let mut package_manager: String;
+pub fn detect_package_manager() -> String {
+    let package_manager: String;
     if (std::path::Path::new("/usr/bin/apt")).exists() {
         package_manager = "apt".to_string();
     } else if (std::path::Path::new("/usr/bin/dnf")).exists() {
@@ -20,5 +18,5 @@ fn detect_package_manager() -> String {
         package_manager = "unknown".to_string();
     }
 
-    package_manager;
+    package_manager
 }
