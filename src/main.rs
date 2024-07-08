@@ -2,6 +2,9 @@ mod env;
 mod syntax;
 mod package;
 
+use std::io::{BufReader, BufRead};
+use std::process::{Stdio};
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let package_manager = env::detect_package_manager();
@@ -54,13 +57,51 @@ fn uninstall(manager: String, package: String) {
 fn upgrade(manager: String) {
     // update
     println!("yu: Updating system");
-    let mut update_cmd: std::process::Command = syntax::gen_update_syntax(manager.clone());
-    let out = update_cmd.output().expect("Failed to execute command");
-    println!("{}", String::from_utf8_lossy(&out.stdout));
+    let mut update_cmd = syntax::gen_update_syntax(manager.clone())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("Failed to execute update command");
+
+    let update_stdout = update_cmd.stdout.take().expect("Failed to capture update stdout");
+    let update_stderr = update_cmd.stderr.take().expect("Failed to capture update stderr");
+
+    let stdout_reader = BufReader::new(update_stdout);
+    let stderr_reader = BufReader::new(update_stderr);
+
+    for line in stdout_reader.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    for line in stderr_reader.lines() {
+        eprintln!("{}", line.unwrap());
+    }
+
+    update_cmd.wait().expect("Update command wasn't running");
+
     // upgrade
     println!("yu: Upgrading system");
-    let mut upgrade_cmd: std::process::Command = syntax::gen_upgrade_syntax(manager.clone());
-    let out = upgrade_cmd.output().expect("Failed to execute command");
-    println!("{}", String::from_utf8_lossy(&out.stdout));
+    let mut upgrade_cmd = syntax::gen_upgrade_syntax(manager.clone())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("Failed to execute upgrade command");
+
+    let upgrade_stdout = upgrade_cmd.stdout.take().expect("Failed to capture upgrade stdout");
+    let upgrade_stderr = upgrade_cmd.stderr.take().expect("Failed to capture upgrade stderr");
+
+    let stdout_reader = BufReader::new(upgrade_stdout);
+    let stderr_reader = BufReader::new(upgrade_stderr);
+
+    for line in stdout_reader.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    for line in stderr_reader.lines() {
+        eprintln!("{}", line.unwrap());
+    }
+
+    upgrade_cmd.wait().expect("Upgrade command wasn't running");
+
     println!("yu: System upgraded");
 }

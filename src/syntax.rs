@@ -1,3 +1,16 @@
+fn get_sudo(manager: String) -> std::process::Command {
+    let command = match manager.as_str() {
+        "apt" | "dnf" | "yum" | "pacman" => {
+            let mut cmd = std::process::Command::new("sudo");
+            cmd.arg(manager.clone());
+            cmd
+        }
+        _ => std::process::Command::new(manager.clone())
+    };
+
+    command
+}
+
 pub fn gen_install_syntax(manager: String) -> std::process::Command {
     let mut command: std::process::Command = std::process::Command::new(manager);
     // add arguments
@@ -13,7 +26,7 @@ pub fn gen_uninstall_syntax(manager: String) -> std::process::Command {
 }
 
 pub fn gen_update_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = std::process::Command::new(manager.clone());
+    let mut command: std::process::Command = get_sudo(manager.clone());
     match manager.as_str() {
         "apt" => {
             command.arg("update");
@@ -41,7 +54,7 @@ pub fn gen_update_syntax(manager: String) -> std::process::Command {
 }
 
 pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = std::process::Command::new(manager.clone());
+    let mut command: std::process::Command = get_sudo(manager.clone());
     match manager.as_str() {
         "apt" => {
             command.arg("upgrade");
