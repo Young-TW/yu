@@ -1,6 +1,5 @@
 mod env;
 mod syntax;
-mod package;
 
 use std::io::{BufReader, BufRead};
 use std::process::{Stdio};
@@ -34,7 +33,6 @@ fn install(manager: String, package: String) {
     // install package using package manager
     let mut cmd: std::process::Command = syntax::gen_install_syntax(manager.clone());
     cmd.arg(package);
-    // cmd.arg(package::find_package(manager, package));
     let out = cmd.output().expect("yu: Failed to execute command");
     println!("{}", String::from_utf8_lossy(&out.stdout));
 }
@@ -49,7 +47,6 @@ fn uninstall(manager: String, package: String) {
     // uninstall package using package manager
     let mut cmd: std::process::Command = syntax::gen_uninstall_syntax(manager.clone());
     cmd.arg(package);
-    // cmd.arg(package::find_package(manager, package));
     let out = cmd.output().expect("yu: Failed to execute command");
     println!("{}", String::from_utf8_lossy(&out.stdout));
 }
