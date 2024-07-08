@@ -4,12 +4,11 @@ mod package;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    let package_manager = env::detect_package_manager();
     if args.len() < 2 {
-        println!("Usage: {} [install|uninstall|upgrade]", args[0]);
+        upgrade(package_manager.clone());
         return;
     }
-
-    let package_manager = env::detect_package_manager();
 
     // check second parameter
     match args[1].as_str() {
