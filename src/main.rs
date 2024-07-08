@@ -16,7 +16,7 @@ fn main() {
         "install" => install(package_manager.clone(), args[2].clone()),
         "uninstall" => uninstall(package_manager.clone(), args[2].clone()),
         "upgrade" => upgrade(package_manager.clone()),
-        _ => println!("Unknown command: {}", args[1]),
+        _ => println!("yu: Unknown command: {}", args[1]),
     }
     0;
 }
@@ -27,13 +27,13 @@ fn install(manager: String, package: String) {
         return;
     }
 
-    println!("Installing package: {}", package);
+    println!("yu: Installing package: {}", package);
     // install package using package manager
     let mut cmd: std::process::Command = syntax::gen_install_syntax(manager.clone());
     cmd.arg(package);
     // cmd.arg(package::find_package(manager, package));
-    cmd.output().expect("Failed to execute command");
-    0;
+    let out = cmd.output().expect("yu: Failed to execute command");
+    println!("{}", String::from_utf8_lossy(&out.stdout));
 }
 
 fn uninstall(manager: String, package: String) {
@@ -42,24 +42,25 @@ fn uninstall(manager: String, package: String) {
         return;
     }
 
-    println!("Uninstalling package: {}", package);
+    println!("yu: Uninstalling package: {}", package);
     // uninstall package using package manager
     let mut cmd: std::process::Command = syntax::gen_uninstall_syntax(manager.clone());
     cmd.arg(package);
     // cmd.arg(package::find_package(manager, package));
-    cmd.output().expect("Failed to execute command");
-    0;
+    let out = cmd.output().expect("yu: Failed to execute command");
+    println!("{}", String::from_utf8_lossy(&out.stdout));
 }
 
 fn upgrade(manager: String) {
     // update
-    println!("Updating system");
+    println!("yu: Updating system");
     let mut update_cmd: std::process::Command = syntax::gen_update_syntax(manager.clone());
-    update_cmd.output().expect("Failed to execute command");
+    let out = update_cmd.output().expect("Failed to execute command");
+    println!("{}", String::from_utf8_lossy(&out.stdout));
     // upgrade
-    println!("Upgrading system");
+    println!("yu: Upgrading system");
     let mut upgrade_cmd: std::process::Command = syntax::gen_upgrade_syntax(manager.clone());
-    upgrade_cmd.output().expect("Failed to execute command");
-    println!("System upgraded");
-    0;
+    let out = upgrade_cmd.output().expect("Failed to execute command");
+    println!("{}", String::from_utf8_lossy(&out.stdout));
+    println!("yu: System upgraded");
 }
