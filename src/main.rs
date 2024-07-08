@@ -31,10 +31,28 @@ fn install(manager: String, package: String) {
 
     println!("yu: Installing package: {}", package);
     // install package using package manager
-    let mut cmd: std::process::Command = syntax::gen_install_syntax(manager.clone());
-    cmd.arg(package);
-    let out = cmd.output().expect("yu: Failed to execute command");
-    println!("{}", String::from_utf8_lossy(&out.stdout));
+    let mut cmd = syntax::gen_install_syntax(manager.clone())
+        .arg(package)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("yu: Failed to execute command");
+
+    let stdout = cmd.stdout.take().expect("Failed to capture stdout");
+    let stderr = cmd.stderr.take().expect("Failed to capture stderr");
+
+    let stdout_reader = BufReader::new(stdout);
+    let stderr_reader = BufReader::new(stderr);
+
+    for line in stdout_reader.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    for line in stderr_reader.lines() {
+        eprintln!("{}", line.unwrap());
+    }
+
+    cmd.wait().expect("Command wasn't running");
 }
 
 fn uninstall(manager: String, package: String) {
@@ -45,10 +63,28 @@ fn uninstall(manager: String, package: String) {
 
     println!("yu: Uninstalling package: {}", package);
     // uninstall package using package manager
-    let mut cmd: std::process::Command = syntax::gen_uninstall_syntax(manager.clone());
-    cmd.arg(package);
-    let out = cmd.output().expect("yu: Failed to execute command");
-    println!("{}", String::from_utf8_lossy(&out.stdout));
+    let mut cmd = syntax::gen_uninstall_syntax(manager.clone())
+        .arg(package)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("yu: Failed to execute command");
+
+    let stdout = cmd.stdout.take().expect("Failed to capture stdout");
+    let stderr = cmd.stderr.take().expect("Failed to capture stderr");
+
+    let stdout_reader = BufReader::new(stdout);
+    let stderr_reader = BufReader::new(stderr);
+
+    for line in stdout_reader.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    for line in stderr_reader.lines() {
+        eprintln!("{}", line.unwrap());
+    }
+
+    cmd.wait().expect("Command wasn't running");
 }
 
 fn upgrade(manager: String) {

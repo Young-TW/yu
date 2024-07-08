@@ -12,7 +12,7 @@ fn get_sudo(manager: String) -> std::process::Command {
 }
 
 pub fn gen_install_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = std::process::Command::new(manager);
+    let mut command: std::process::Command = get_sudo(manager.clone());
     // add arguments
     command.arg("install");
     command.arg("-y");
@@ -20,7 +20,7 @@ pub fn gen_install_syntax(manager: String) -> std::process::Command {
 }
 
 pub fn gen_uninstall_syntax(manager: String) -> std::process::Command {
-    let command: std::process::Command = std::process::Command::new(manager);
+    let command: std::process::Command = get_sudo(manager.clone());
     // add arguments
     command
 }
