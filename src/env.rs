@@ -10,8 +10,6 @@ pub fn detect_package_manager() -> String {
         package_manager = "brew".to_string();
     } else if (std::path::Path::new("/usr/bin/zypper")).exists() {
         package_manager = "zypper".to_string();
-    } else if (std::path::Path::new("/usr/bin/paru")).exists() {
-        package_manager = "paru".to_string();
     } else if (std::path::Path::new("/usr/bin/pacman")).exists() {
         package_manager = "pacman".to_string();
     } else {

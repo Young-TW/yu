@@ -37,9 +37,6 @@ pub fn gen_update_syntax(manager: String) -> std::process::Command {
         "yum" => {
             command.arg("check-update");
         },
-        "paru" => {
-            // pass
-        },
         "pacman" => {
             command.arg("-Sy");
         },
@@ -67,9 +64,6 @@ pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
         "yum" => {
             command.arg("upgrade");
             command.arg("-y");
-        },
-        "paru" => {
-            // pass
         },
         "pacman" => {
             command.arg("-Syu");
