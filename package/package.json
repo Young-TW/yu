@@ -1,0 +1,34 @@
+{
+    "cmake": {
+        "apt": "cmake",
+        "dnf": "cmake",
+        "yum": "cmake",
+        "paru": "cmake",
+        "pacman": "cmake",
+        "brew": "cmake"
+    },
+    "gcc": {
+        "apt": "gcc",
+        "dnf": "gcc",
+        "yum": "gcc",
+        "paru": "gcc",
+        "pacman": "gcc",
+        "brew": "gcc"
+    },
+    "g++": {
+        "apt": "g++",
+        "dnf": "gcc-c++",
+        "yum": "gcc-c++",
+        "paru": "gcc",
+        "pacman": "gcc",
+        "brew": "gcc"
+    },
+    "python": {
+        "apt": "python3",
+        "dnf": "python3",
+        "yum": "python3",
+        "paru": "python",
+        "pacman": "python",
+        "brew": "python"
+    }
+}

@@ -10,6 +10,7 @@ fn main() {
         return;
     }
 
+    // package::write_into_dotfile();
     // check second parameter
     match args[1].as_str() {
         "install" => install(package_manager.clone(), args[2].clone()),
@@ -28,8 +29,9 @@ fn install(manager: String, package: String) {
 
     println!("Installing package: {}", package);
     // install package using package manager
-    let mut cmd: std::process::Command = syntax::gen_install_syntax(manager);
+    let mut cmd: std::process::Command = syntax::gen_install_syntax(manager.clone());
     cmd.arg(package);
+    // cmd.arg(package::find_package(manager, package));
     cmd.output().expect("Failed to execute command");
     0;
 }
@@ -42,18 +44,20 @@ fn uninstall(manager: String, package: String) {
 
     println!("Uninstalling package: {}", package);
     // uninstall package using package manager
-    let mut cmd: std::process::Command = syntax::gen_uninstall_syntax(manager);
+    let mut cmd: std::process::Command = syntax::gen_uninstall_syntax(manager.clone());
     cmd.arg(package);
+    // cmd.arg(package::find_package(manager, package));
     cmd.output().expect("Failed to execute command");
     0;
 }
 
 fn upgrade(manager: String) {
     // update
-    println!("Upgrading system");
+    println!("Updating system");
     let mut update_cmd: std::process::Command = syntax::gen_update_syntax(manager.clone());
     update_cmd.output().expect("Failed to execute command");
     // upgrade
+    println!("Upgrading system");
     let mut upgrade_cmd: std::process::Command = syntax::gen_upgrade_syntax(manager.clone());
     upgrade_cmd.output().expect("Failed to execute command");
     println!("System upgraded");
