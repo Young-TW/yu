@@ -2,6 +2,8 @@
 
 `yu` is a package manager for all unix-like systems.
 
+[![CodeFactor](https://www.codefactor.io/repository/github/young-tw/yu/badge)](https://www.codefactor.io/repository/github/young-tw/yu)
+
 ## Installation
 
 ```bash
