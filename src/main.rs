@@ -14,8 +14,6 @@ fn main() {
     let mut bundle = FluentBundle::new(vec![langid_zh_tw]);
     bundle.add_resource(resource).expect("Failed to add resource");
 
-    // language::print_message(bundle, "yu: Unknown command: ");
-
     let args: Vec<String> = std::env::args().collect();
     let package_manager = env::detect_package_manager();
     if args.len() < 2 {
@@ -29,7 +27,10 @@ fn main() {
         "install" => install(package_manager.clone(), args[2].clone()),
         "uninstall" => uninstall(package_manager.clone(), args[2].clone()),
         "upgrade" => upgrade(package_manager.clone()),
-        _ => println!("yu: Unknown command: {}", args[1]),
+        _ => {
+            language::print_message(bundle, "unknown-command");
+            print!(": {}", args[1]);
+        }
     }
     0;
 }

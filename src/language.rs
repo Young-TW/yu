@@ -21,5 +21,5 @@ pub fn print_message<R: std::borrow::Borrow<fluent::FluentResource>>(bundle: Flu
     let pattern = msg.value().expect("Message has no value.");
     let mut errors = vec![];
     let value = bundle.format_pattern(pattern, None, &mut errors);
-    println!("{}", value);
+    print!("{}", value);
 }
