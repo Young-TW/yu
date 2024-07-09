@@ -1,7 +1,7 @@
 use std::env;
 
 pub fn detect_language() -> String {
-    let mut language: String = "en_US".to_string();
+    let mut language: String = "en-US".to_string();
 
     if env::var("LANG").is_ok() {
         language = env::var("LANG").unwrap();
