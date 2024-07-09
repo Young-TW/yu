@@ -14,14 +14,37 @@ fn get_sudo(manager: String) -> std::process::Command {
 pub fn gen_install_syntax(manager: String) -> std::process::Command {
     let mut command: std::process::Command = get_sudo(manager.clone());
     // add arguments
-    command.arg("install");
-    command.arg("-y");
+    match manager.as_str() {
+        "apt" | "dnf" | "yum" | "pacman" => {
+            command.arg("install");
+            command.arg("-y");
+        },
+        "brew" => {
+            command.arg("install");
+        },
+        _ => {
+            println!("Unknown package manager: {}", manager);
+        }
+    }
     command
 }
 
 pub fn gen_uninstall_syntax(manager: String) -> std::process::Command {
-    let command: std::process::Command = get_sudo(manager.clone());
+    let mut command: std::process::Command = get_sudo(manager.clone());
     // add arguments
+    match manager.as_str() {
+        "apt" | "dnf" | "yum" | "pacman" => {
+            command.arg("remove");
+            command.arg("-y");
+        },
+        "brew" => {
+            command.arg("uninstall");
+        },
+        _ => {
+            println!("Unknown package manager: {}", manager);
+        }
+    }
+
     command
 }
 
