@@ -1,10 +1,21 @@
+use std::process::Stdio;
+use std::io::{BufReader, BufRead};
+
+use fluent::FluentBundle;
+use unic_langid::langid;
+
 mod env;
 mod syntax;
-
-use std::io::{BufReader, BufRead};
-use std::process::{Stdio};
+mod language;
 
 fn main() {
+    let langid_zh_tw = langid!("zh-TW");
+    let resource = language::load_resource(&langid_zh_tw, "text.ftl");
+    let mut bundle = FluentBundle::new(vec![langid_zh_tw]);
+    bundle.add_resource(resource).expect("Failed to add resource");
+
+    // language::print_message(bundle, "yu: Unknown command: ");
+
     let args: Vec<String> = std::env::args().collect();
     let package_manager = env::detect_package_manager();
     if args.len() < 2 {

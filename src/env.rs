@@ -1,3 +1,17 @@
+use std::env;
+
+pub fn detect_language() -> String {
+    let mut language: String = "en_US".to_string();
+
+    if env::var("LANG").is_ok() {
+        language = env::var("LANG").unwrap();
+    } else if env::var("LANGUAGE").is_ok() {
+        language = env::var("LANGUAGE").unwrap();
+    }
+
+    language
+}
+
 pub fn detect_package_manager() -> String {
     let package_manager: String;
     if (std::path::Path::new("/usr/bin/apt")).exists() {
