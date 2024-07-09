@@ -1,6 +1,6 @@
-# yu - a package manager for all unix-like systems
+# yu - a package manager wrapper for all unix-like systems
 
-`yu` is a package manager for all unix-like systems.
+`yu` allows users to use the same command to install, uninstall, and upgrade packages on all unix-like systems.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/young-tw/yu/badge)](https://www.codefactor.io/repository/github/young-tw/yu)
 
@@ -8,6 +8,24 @@
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh | bash
+```
+
+### Build from source
+
+#### Build
+
+Please make sure you have installed `rust` and `cargo`.
+
+```bash
+git clone https://github.com/Young-TW/yu.git
+cd yu
+cargo build --release
+```
+
+#### Install
+
+```bash
+cargo install --path .
 ```
 
 ## Usage
