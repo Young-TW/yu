@@ -21,7 +21,6 @@ fn main() {
         return;
     }
 
-    // package::write_into_dotfile();
     // check second parameter
     match args[1].as_str() {
         "install" => install(package_manager.clone(), args[2].clone()),
