@@ -28,6 +28,8 @@ cargo build --release
 cargo install --path .
 ```
 
+please make sure the `~/.cargo/bin` is in your `PATH`.
+
 ## Usage
 
 install package:
