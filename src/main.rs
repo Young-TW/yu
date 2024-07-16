@@ -9,7 +9,8 @@ mod language;
 
 fn main() {
     let langid_zh_tw = langid!("zh-TW");
-    let resource = language::load_resource(&langid_zh_tw, "text.ftl");
+    let ftl_content = include_str!("../i18n/zh-TW/text.ftl");
+    let resource = language::load_resource(&langid_zh_tw, ftl_content);
     let mut bundle = FluentBundle::new(vec![langid_zh_tw]);
     bundle.add_resource(resource).expect("Failed to add resource");
 
