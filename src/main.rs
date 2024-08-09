@@ -1,19 +1,9 @@
 use std::process::{Stdio};
 
-use fluent::FluentBundle;
-use unic_langid::langid;
-
 mod env;
 mod syntax;
-mod language;
 
 fn main() {
-    let langid_zh_tw = langid!("zh-TW");
-    let ftl_content = include_str!("../i18n/zh-TW/text.ftl");
-    let resource = language::load_resource(&langid_zh_tw, ftl_content);
-    let mut bundle = FluentBundle::new(vec![langid_zh_tw]);
-    bundle.add_resource(resource).expect("Failed to add resource");
-
     let args: Vec<String> = std::env::args().collect();
     let package_manager = env::detect_package_manager();
     if args.len() < 2 {
@@ -21,17 +11,14 @@ fn main() {
         return;
     }
 
-    // check second parameter
     match args[1].as_str() {
         "install" => install(package_manager.clone(), args[2].clone()),
         "uninstall" => uninstall(package_manager.clone(), args[2].clone()),
         "upgrade" => upgrade(package_manager.clone()),
         _ => {
-            language::print_message(bundle, "unknown-command");
-            print!(": {}", args[1]);
+            println!("Unknown command: {}", args[1]);
         }
     }
-    0;
 }
 
 fn install(manager: String, package: String) {
