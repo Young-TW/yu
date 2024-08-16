@@ -55,3 +55,5 @@ or
 ```bash
 yu upgrade
 ```
+
+package name is the same as the package name in the package manager of the system.
