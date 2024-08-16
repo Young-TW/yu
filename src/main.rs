@@ -1,4 +1,4 @@
-use std::process::{Stdio};
+use std::process::Stdio;
 
 mod env;
 mod syntax;

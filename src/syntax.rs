@@ -5,7 +5,7 @@ fn get_sudo(manager: String) -> std::process::Command {
             cmd.arg(manager.clone());
             cmd
         }
-        _ => std::process::Command::new(manager.clone())
+        _ => std::process::Command::new(manager.clone()),
     };
 
     command
@@ -18,10 +18,10 @@ pub fn gen_install_syntax(manager: String) -> std::process::Command {
         "apt" | "dnf" | "yum" | "pacman" => {
             command.arg("install");
             command.arg("-y");
-        },
+        }
         "brew" => {
             command.arg("install");
-        },
+        }
         _ => {
             println!("Unknown package manager: {}", manager);
         }
@@ -36,10 +36,10 @@ pub fn gen_uninstall_syntax(manager: String) -> std::process::Command {
         "apt" | "dnf" | "yum" | "pacman" => {
             command.arg("remove");
             command.arg("-y");
-        },
+        }
         "brew" => {
             command.arg("uninstall");
-        },
+        }
         _ => {
             println!("Unknown package manager: {}", manager);
         }
@@ -53,19 +53,19 @@ pub fn gen_update_syntax(manager: String) -> std::process::Command {
     match manager.as_str() {
         "apt" => {
             command.arg("update");
-        },
+        }
         "dnf" => {
             command.arg("check-update");
-        },
+        }
         "yum" => {
             command.arg("check-update");
-        },
+        }
         "pacman" => {
             command.arg("-Sy");
-        },
+        }
         "brew" => {
             command.arg("update");
-        },
+        }
         _ => {
             println!("Unknown package manager: {}", manager);
         }
@@ -79,21 +79,21 @@ pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
         "apt" => {
             command.arg("upgrade");
             command.arg("-y");
-        },
+        }
         "dnf" => {
             command.arg("upgrade");
             command.arg("-y");
-        },
+        }
         "yum" => {
             command.arg("upgrade");
             command.arg("-y");
-        },
+        }
         "pacman" => {
             command.arg("-Syu");
-        },
+        }
         "brew" => {
             command.arg("upgrade");
-        },
+        }
         _ => {
             println!("Unknown package manager: {}", manager);
         }
