@@ -1,5 +1,4 @@
 use clap::{Arg, Command};
-use std::process::Stdio;
 
 mod env;
 mod syntax;
@@ -23,20 +22,28 @@ fn main() {
         .arg(
             Arg::new("silent")
                 .long("silent")
+                .short('S')
                 .help("Run the command silently")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("verbose")
                 .long("verbose")
+                .short('V')
                 .help("Run the command with verbose output")
                 .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("version")
+                .short('v')
+                .long("version")
+                .help("Show the version information")
+                .action(clap::ArgAction::Version),
         )
         .get_matches();
 
     let package_manager = env::detect_package_manager();
 
-    // 檢查是否提供命令，若無則默認為 "upgrade"
     let command = matches.get_one::<String>("command").map(|s| s.as_str()).unwrap_or("upgrade");
     let package = matches.get_one::<String>("package").unwrap_or(&"".to_string()).to_string();
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
@@ -47,14 +54,14 @@ fn main() {
         "uninstall" => uninstall(package_manager.clone(), package, silent, verbose),
         "upgrade" => upgrade(package_manager.clone(), silent, verbose),
         _ => {
-            println!("Unknown command: {}", command);
+            eprintln!("Unknown command: {}", command);
         }
     }
 }
 
 fn install(manager: String, package: String, silent: bool, verbose: bool) {
     if package.is_empty() {
-        println!("Usage: install <package>");
+        eprintln!("Usage: install <package>");
         return;
     }
 
@@ -64,8 +71,8 @@ fn install(manager: String, package: String, silent: bool, verbose: bool) {
 
     let mut cmd = syntax::gen_install_syntax(manager.clone())
         .arg(package)
-        .stdout(if verbose { Stdio::inherit() } else { Stdio::null() })
-        .stderr(Stdio::inherit())
+        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
+        .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("yu: Failed to execute command");
 
@@ -74,7 +81,7 @@ fn install(manager: String, package: String, silent: bool, verbose: bool) {
 
 fn uninstall(manager: String, package: String, silent: bool, verbose: bool) {
     if package.is_empty() {
-        println!("Usage: uninstall <package>");
+        eprintln!("Usage: uninstall <package>");
         return;
     }
 
@@ -84,8 +91,8 @@ fn uninstall(manager: String, package: String, silent: bool, verbose: bool) {
 
     let mut cmd = syntax::gen_uninstall_syntax(manager.clone())
         .arg(package)
-        .stdout(if verbose { Stdio::inherit() } else { Stdio::null() })
-        .stderr(Stdio::inherit())
+        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
+        .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("yu: Failed to execute command");
 
@@ -97,8 +104,8 @@ fn upgrade(manager: String, silent: bool, verbose: bool) {
         println!("yu: Updating system");
     }
     let mut update_cmd = syntax::gen_update_syntax(manager.clone())
-        .stdout(if verbose { Stdio::inherit() } else { Stdio::null() })
-        .stderr(Stdio::inherit())
+        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
+        .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("Failed to execute update command");
 
@@ -108,8 +115,8 @@ fn upgrade(manager: String, silent: bool, verbose: bool) {
         println!("yu: Upgrading system");
     }
     let mut upgrade_cmd = syntax::gen_upgrade_syntax(manager.clone())
-        .stdout(if verbose { Stdio::inherit() } else { Stdio::null() })
-        .stderr(Stdio::inherit())
+        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
+        .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("Failed to execute upgrade command");
 
