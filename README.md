@@ -10,7 +10,18 @@
 curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh | bash
 ```
 
-### Build from source
+## Supported package managers
+
+- [x] `apt`
+- [x] `dnf`
+- [x] `pacman`
+- [x] `yum`
+- [x] `homebrew`
+- [ ] `zypper`
+- [ ] `portage`
+- [ ] `apk`
+
+### Build from source manually
 
 #### Build
 
@@ -44,7 +55,7 @@ uninstall package:
 yu uninstall <package>
 ```
 
-upgrade package:
+upgrade all packages:
 
 ```bash
 yu
@@ -57,3 +68,10 @@ yu upgrade
 ```
 
 package name is the same as the package name in the package manager of the system.
+
+### Flags
+
+- `-h`, `--help`: Show help message.
+- `-v`, `--version`: Show version.
+- `-V`, `--verbose`: Show verbose output.
+- `-S`, `--silent`: Show no output(only error output).
