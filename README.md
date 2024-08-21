@@ -17,9 +17,9 @@ curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh |
 - [x] `pacman`
 - [x] `yum`
 - [x] `homebrew`
-- [ ] `zypper`
-- [ ] `portage`
-- [ ] `apk`
+- [x] `zypper`
+- [x] `portage`
+- [x] `apk`
 
 ### Build from source manually
 
