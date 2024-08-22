@@ -21,6 +21,14 @@ jobs:
     - name: Build
       run: cargo build --release
 
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
