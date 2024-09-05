@@ -3,6 +3,13 @@ use clap::{Arg, Command};
 mod env;
 mod syntax;
 
+mod command {
+    pub mod install;
+    pub mod uninstall;
+    pub mod upgrade;
+    pub mod update;
+}
+
 fn main() {
     let matches = Command::new("yu")
         .version("0.1.0")
@@ -50,79 +57,10 @@ fn main() {
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
     match command {
-        "install" => install(package_manager.clone(), package, silent, verbose),
-        "uninstall" => uninstall(package_manager.clone(), package, silent, verbose),
-        "upgrade" => upgrade(package_manager.clone(), silent, verbose),
-        _ => {
-            eprintln!("Unknown command: {}", command);
-        }
-    }
-}
-
-fn install(manager: String, package: String, silent: bool, verbose: bool) {
-    if package.is_empty() {
-        eprintln!("Usage: install <package>");
-        return;
-    }
-
-    if !silent {
-        println!("yu: Installing package: {}", package);
-    }
-
-    let mut cmd = syntax::gen_install_syntax(manager.clone())
-        .arg(package)
-        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("yu: Failed to execute command");
-
-    cmd.wait().expect("Command wasn't running");
-}
-
-fn uninstall(manager: String, package: String, silent: bool, verbose: bool) {
-    if package.is_empty() {
-        eprintln!("Usage: uninstall <package>");
-        return;
-    }
-
-    if !silent {
-        println!("yu: Uninstalling package: {}", package);
-    }
-
-    let mut cmd = syntax::gen_uninstall_syntax(manager.clone())
-        .arg(package)
-        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("yu: Failed to execute command");
-
-    cmd.wait().expect("Command wasn't running");
-}
-
-fn upgrade(manager: String, silent: bool, verbose: bool) {
-    if !silent {
-        println!("yu: Updating system");
-    }
-    let mut update_cmd = syntax::gen_update_syntax(manager.clone())
-        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("Failed to execute update command");
-
-    update_cmd.wait().expect("Update command wasn't running");
-
-    if !silent {
-        println!("yu: Upgrading system");
-    }
-    let mut upgrade_cmd = syntax::gen_upgrade_syntax(manager.clone())
-        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("Failed to execute upgrade command");
-
-    upgrade_cmd.wait().expect("Upgrade command wasn't running");
-
-    if !silent {
-        println!("yu: System upgraded");
+        "install" => command::install::install(package_manager, package, silent, verbose),
+        "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),
+        "upgrade" => command::upgrade::upgrade(package_manager, silent, verbose),
+        "update" => command::update::update(package_manager, silent, verbose),
+        _ => eprintln!("Unknown command: {}", command),
     }
 }
