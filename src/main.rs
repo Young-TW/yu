@@ -8,6 +8,7 @@ mod command {
     pub mod uninstall;
     pub mod upgrade;
     pub mod update;
+    pub mod list;
 }
 
 fn main() {
@@ -29,23 +30,23 @@ fn main() {
         .arg(
             Arg::new("silent")
                 .long("silent")
-                .short('S')
+                .short('s')
                 .help("Run the command silently")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("verbose")
                 .long("verbose")
-                .short('V')
+                .short('v')
                 .help("Run the command with verbose output")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
-            Arg::new("version")
-                .short('v')
-                .long("version")
-                .help("Show the version information")
-                .action(clap::ArgAction::Version),
+            Arg::new("list")
+                .long("list")
+                .short('l')
+                .help("List installed packages")
+                .action(clap::ArgAction::SetTrue),
         )
         .get_matches();
 
@@ -61,6 +62,7 @@ fn main() {
         "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),
         "upgrade" => command::upgrade::upgrade(package_manager, silent, verbose),
         "update" => command::update::update(package_manager, silent, verbose),
+        "list" => command::list::list(package_manager, silent, verbose),
         _ => eprintln!("Unknown command: {}", command),
     }
 }

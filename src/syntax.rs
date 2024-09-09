@@ -124,3 +124,43 @@ pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
 
     command
 }
+
+pub fn gen_list_syntax(manager: String) -> std::process::Command {
+    let mut command: std::process::Command = get_sudo(manager.clone());
+    match manager.as_str() {
+        "apt" => {
+            command.arg("list");
+            command.arg("--installed");
+        }
+        "dnf" => {
+            command.arg("list");
+            command.arg("installed");
+        }
+        "yum" => {
+            command.arg("list");
+            command.arg("installed");
+        }
+        "pacman" => {
+            command.arg("-Q");
+        }
+        "zypper" => {
+            command.arg("search");
+            command.arg("--installed-only");
+        }
+        "apk" => {
+            command.arg("info");
+            command.arg("--installed");
+        }
+        "portage" => {
+            command.arg("--list");
+            command.arg("world");
+        }
+        "brew" => {
+            command.arg("list");
+        }
+        _ => {
+            println!("Unknown package manager: {}", manager);
+        }
+    }
+    command
+}
