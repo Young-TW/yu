@@ -62,7 +62,7 @@ fn main() {
         "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),
         "upgrade" => command::upgrade::upgrade(package_manager, silent, verbose),
         "update" => command::update::update(package_manager, silent, verbose),
-        "list" => command::list::list(package_manager, silent, verbose),
+        "list" => command::list::list(package_manager),
         _ => eprintln!("Unknown command: {}", command),
     }
 }
