@@ -6,6 +6,7 @@ mod syntax;
 mod command {
     pub mod install;
     pub mod uninstall;
+    pub mod reinstall;
     pub mod upgrade;
     pub mod update;
     pub mod list;
@@ -60,6 +61,7 @@ fn main() {
     match command {
         "install" => command::install::install(package_manager, package, silent, verbose),
         "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),
+        "reinstall" => command::reinstall::reinstall(package_manager, package, silent, verbose),
         "upgrade" => command::upgrade::upgrade(package_manager, silent, verbose),
         "update" => command::update::update(package_manager, silent, verbose),
         "list" => command::list::list(package_manager),

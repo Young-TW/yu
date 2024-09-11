@@ -125,6 +125,31 @@ pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
     command
 }
 
+pub fn gen_reinstall_syntax(manager: String) -> std::process::Command {
+    let mut command: std::process::Command = get_sudo(manager.clone());
+    match manager.as_str() {
+        "apt" | "dnf" | "yum" | "pacman" | "zypper" => {
+            command.arg("reinstall");
+            command.arg("-y");
+        }
+        "apk" => {
+            command.arg("add");
+            command.arg("-f");
+        }
+        "portage" => {
+            command.arg("emerge");
+            command.arg("--oneshot");
+        }
+        "brew" => {
+            command.arg("reinstall");
+        }
+        _ => {
+            println!("Unknown package manager: {}", manager);
+        }
+    }
+    command
+}
+
 pub fn gen_list_syntax(manager: String) -> std::process::Command {
     let mut command: std::process::Command = get_sudo(manager.clone());
     match manager.as_str() {
