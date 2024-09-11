@@ -55,6 +55,18 @@ uninstall package:
 yu uninstall <package>
 ```
 
+reinstall package:
+
+```bash
+yu reinstall <package>
+```
+
+update package list:
+
+```bash
+yu update
+```
+
 upgrade all packages:
 
 ```bash
