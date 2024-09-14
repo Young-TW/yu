@@ -53,6 +53,10 @@ fn main() {
         .get_matches();
 
     let package_manager = env::detect_package_manager();
+    if package_manager == "Unknown" {
+        eprintln!("Unknown package manager");
+        return;
+    }
 
     let command = matches.get_one::<String>("command").map(|s| s.as_str()).unwrap_or("upgrade");
     let package = matches.get_one::<String>("package").unwrap_or(&"".to_string()).to_string();
