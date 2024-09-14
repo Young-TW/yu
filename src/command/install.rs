@@ -10,12 +10,12 @@ pub fn install(manager: String, package: String, silent: bool, verbose: bool) {
         println!("yu: Installing package: {}", package);
     }
 
-    let mut cmd = syntax::gen_install_syntax(manager.clone())
+    let mut install_cmd = syntax::gen_install_syntax(manager.clone())
         .arg(package)
         .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
         .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("yu: Failed to execute command");
 
-    cmd.wait().expect("Command wasn't running");
+    install_cmd.wait().expect("Command wasn't running");
 }

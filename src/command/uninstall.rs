@@ -10,12 +10,12 @@ pub fn uninstall(manager: String, package: String, silent: bool, verbose: bool) 
         println!("yu: Uninstalling package: {}", package);
     }
 
-    let mut cmd = syntax::gen_uninstall_syntax(manager.clone())
+    let mut uninstall_cmd = syntax::gen_uninstall_syntax(manager.clone())
         .arg(package)
         .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
         .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("yu: Failed to execute command");
 
-    cmd.wait().expect("Command wasn't running");
+    uninstall_cmd.wait().expect("Command wasn't running");
 }
