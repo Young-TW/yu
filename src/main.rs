@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
 
 mod env;
-mod syntax;
+mod root;
 
 mod command {
     pub mod info;
