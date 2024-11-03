@@ -10,9 +10,11 @@ pub fn upgrade(manager: String, silent: bool, verbose: bool) {
         .spawn()
         .expect("Failed to execute upgrade command");
 
-    upgrade_cmd.wait().expect("Upgrade command wasn't running");
+    let upgrade_result = upgrade_cmd.wait().expect("Upgrade command wasn't running");
 
-    if !silent {
+    if !upgrade_result.success() {
+        println!("yu: Failed to upgrade system");
+    } else if !silent {
         println!("yu: System upgraded");
     }
 }
