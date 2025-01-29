@@ -6,11 +6,11 @@ mod root;
 mod command {
     pub mod info;
     pub mod install;
-    pub mod uninstall;
-    pub mod reinstall;
-    pub mod upgrade;
-    pub mod update;
     pub mod list;
+    pub mod reinstall;
+    pub mod uninstall;
+    pub mod update;
+    pub mod upgrade;
 }
 
 fn main() {
@@ -43,13 +43,6 @@ fn main() {
                 .help("Run the command with verbose output")
                 .action(clap::ArgAction::SetTrue),
         )
-        .arg(
-            Arg::new("list")
-                .long("list")
-                .short('l')
-                .help("List installed packages")
-                .action(clap::ArgAction::SetTrue),
-        )
         .get_matches();
 
     let package_manager = env::detect_package_manager();
@@ -58,8 +51,14 @@ fn main() {
         return;
     }
 
-    let command = matches.get_one::<String>("command").map(|s| s.as_str()).unwrap_or("upgrade");
-    let package = matches.get_one::<String>("package").unwrap_or(&"".to_string()).to_string();
+    let command = matches
+        .get_one::<String>("command")
+        .map(|s| s.as_str())
+        .unwrap_or("upgrade");
+    let package = matches
+        .get_one::<String>("package")
+        .unwrap_or(&"".to_string())
+        .to_string();
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
