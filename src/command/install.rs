@@ -12,7 +12,11 @@ pub fn install(manager: String, package: String, silent: bool, verbose: bool) {
 
     let mut install_cmd = gen_install_syntax(manager.clone())
         .arg(package)
-        .stdout(if verbose { std::process::Stdio::inherit() } else { std::process::Stdio::null() })
+        .stdout(if verbose {
+            std::process::Stdio::inherit()
+        } else {
+            std::process::Stdio::null()
+        })
         .stderr(std::process::Stdio::inherit())
         .spawn()
         .expect("yu: Failed to execute command");
