@@ -1,7 +1,7 @@
 use crate::root::get_sudo;
 
-pub fn autoremove(manager: String, slient: bool, verbose: bool) {
-    if !slient {
+pub fn autoremove(manager: String, silent: bool) {
+    if !silent {
         println!("yu: Auto removing unused packages")
     }
 
