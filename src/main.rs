@@ -4,6 +4,7 @@ mod env;
 mod root;
 
 mod command {
+    pub mod autoremove;
     pub mod info;
     pub mod install;
     pub mod list;
@@ -63,6 +64,7 @@ fn main() {
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
     match command {
+        "autoremove" => command::autoremove::autoremove(package_manager, silent, verbose),
         "info" => command::info::info(package_manager, package, silent),
         "install" => command::install::install(package_manager, package, silent, verbose),
         "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),

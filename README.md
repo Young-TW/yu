@@ -81,6 +81,12 @@ yu upgrade
 
 package name is the same as the package name in the package manager of the system.
 
+auto remove unused packages:
+
+```bash
+yu autoremove
+```
+
 ### Flags
 
 - `-h`, `--help`: Show help message.
