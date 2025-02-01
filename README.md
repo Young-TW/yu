@@ -41,6 +41,12 @@ cargo install --path .
 
 please make sure the `~/.cargo/bin` is in your `PATH`.
 
+Another way to install `yu` is just copy the `yu` script to your system.
+
+```bash
+sudo cp target/release/yu /usr/local/bin/yu
+```
+
 ## Usage
 
 install package:
