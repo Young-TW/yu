@@ -2,9 +2,9 @@
 
 `yu` allows users to use the same command to install, uninstall, and upgrade packages on all unix-like systems.
 
-[![CodeFactor](https://www.codefactor.io/repository/github/young-tw/yu/badge)](https://www.codefactor.io/repository/github/young-tw/yu)
-
 ## Installation
+
+This script will clone the repository, build the `yu` package, and install it to your system.
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh | bash
