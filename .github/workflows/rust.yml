@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  release:
+    types: [created]
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,3 +22,38 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+
+  release:
+    name: Release - ${{ matrix.platform.release_for }}
+    if: github.event_name == 'release'
+    strategy:
+      matrix:
+        platform:
+          - release_for: Windows-x86_64
+            os: windows-latest
+            binary_path: target/release/yu.exe
+            asset_name: yu-windows-x86_64.exe
+          - release_for: macOS-x86_64
+            os: macos-latest
+            binary_path: target/release/yu
+            asset_name: yu-macos-x86_64
+          - release_for: Linux-x86_64
+            os: ubuntu-latest
+            binary_path: target/release/yu
+            asset_name: yu-linux-x86_64
+
+    runs-on: ${{ matrix.platform.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build binary
+        run: cargo build --release
+        
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.platform.binary_path }}
+          asset_name: ${{ matrix.platform.asset_name }}
+          tag: ${{ github.ref }}
