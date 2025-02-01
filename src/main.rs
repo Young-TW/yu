@@ -16,7 +16,7 @@ mod command {
 
 fn main() {
     let matches = Command::new("yu")
-        .version("0.1.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .about("A simple package manager wrapper")
         .arg(
             Arg::new("command")
