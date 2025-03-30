@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
+which = "7.0.2"
+whoami = "1.6.0"
