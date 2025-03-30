@@ -1,17 +1,7 @@
-use crate::root::get_sudo;
-
-pub fn list(manager: String) {
-    let mut list_cmd = gen_list_syntax(manager.clone())
-        .stdout(std::process::Stdio::inherit())
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("yu: Failed to execute command");
-
-    list_cmd.wait().expect("Command wasn't running");
-}
+use std::process::Command;
 
 pub fn gen_list_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = get_sudo(manager.clone());
+    let mut command: std::process::Command = Command::new(manager.clone());
     match manager.as_str() {
         "apt" => {
             command.arg("list");
@@ -69,49 +59,49 @@ mod tests {
     fn test_gen_list_syntax_apt() {
         let cmd = gen_list_syntax("apt".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apt", "list", "--installed"]);
+        assert_eq!(args, vec!["apt", "list", "--installed"]);
     }
 
     #[test]
     fn test_gen_list_syntax_dnf() {
         let cmd = gen_list_syntax("dnf".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "dnf", "list", "installed"]);
+        assert_eq!(args, vec!["dnf", "list", "installed"]);
     }
 
     #[test]
     fn test_gen_list_syntax_yum() {
         let cmd = gen_list_syntax("yum".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "yum", "list", "installed"]);
+        assert_eq!(args, vec!["yum", "list", "installed"]);
     }
 
     #[test]
     fn test_gen_list_syntax_pacman() {
         let cmd = gen_list_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "pacman", "-Q"]);
+        assert_eq!(args, vec!["pacman", "-Q"]);
     }
 
     #[test]
     fn test_gen_list_syntax_zypper() {
         let cmd = gen_list_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "zypper", "search", "--installed-only"]);
+        assert_eq!(args, vec!["zypper", "search", "--installed-only"]);
     }
 
     #[test]
     fn test_gen_list_syntax_apk() {
         let cmd = gen_list_syntax("apk".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apk", "info", "--installed"]);
+        assert_eq!(args, vec!["apk", "info", "--installed"]);
     }
 
     #[test]
     fn test_gen_list_syntax_portage() {
         let cmd = gen_list_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "portage", "--list", "world"]);
+        assert_eq!(args, vec!["portage", "--list", "world"]);
     }
 
     #[test]

@@ -1,24 +1,7 @@
-use crate::root::get_sudo;
-
-pub fn update(manager: String, silent: bool, verbose: bool) {
-    if !silent {
-        println!("yu: Updating system");
-    }
-    let mut update_cmd = gen_update_syntax(manager.clone())
-        .stdout(if verbose {
-            std::process::Stdio::inherit()
-        } else {
-            std::process::Stdio::null()
-        })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("Failed to execute update command");
-
-    update_cmd.wait().expect("Update command wasn't running");
-}
+use std::process::Command;
 
 pub fn gen_update_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = get_sudo(manager.clone());
+    let mut command: std::process::Command = Command::new(manager.clone());
     match manager.as_str() {
         "apt" => {
             command.arg("update");
@@ -63,42 +46,42 @@ mod tests {
     fn test_gen_update_syntax_apt() {
         let cmd = gen_update_syntax("apt".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apt", "update"]);
+        assert_eq!(args, vec!["apt", "update"]);
     }
 
     #[test]
     fn test_gen_update_syntax_dnf() {
         let cmd = gen_update_syntax("dnf".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "dnf", "check-update"]);
+        assert_eq!(args, vec!["dnf", "check-update"]);
     }
 
     #[test]
     fn test_gen_update_syntax_pacman() {
         let cmd = gen_update_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "pacman", "-Sy"]);
+        assert_eq!(args, vec!["pacman", "-Sy"]);
     }
 
     #[test]
     fn test_gen_update_syntax_zypper() {
         let cmd = gen_update_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "zypper", "refresh"]);
+        assert_eq!(args, vec!["zypper", "refresh"]);
     }
 
     #[test]
     fn test_gen_update_syntax_apk() {
         let cmd = gen_update_syntax("apk".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apk", "update"]);
+        assert_eq!(args, vec!["apk", "update"]);
     }
 
     #[test]
     fn test_gen_update_syntax_portage() {
         let cmd = gen_update_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "portage", "sync"]);
+        assert_eq!(args, vec!["portage", "sync"]);
     }
 
     #[test]

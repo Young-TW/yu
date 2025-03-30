@@ -1,27 +1,7 @@
-use crate::root::get_sudo;
-
-pub fn info(manager: String, package: String, silent: bool) {
-    if package.is_empty() {
-        eprintln!("Usage: info <package>");
-        return;
-    }
-
-    if !silent {
-        println!("yu: Getting package information");
-    }
-
-    let mut info_cmd = gen_info_syntax(manager.clone())
-        .arg(package)
-        .stdout(std::process::Stdio::inherit())
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("Failed to execute info command");
-
-    info_cmd.wait().expect("Info command wasn't running");
-}
+use std::process::Command;
 
 pub fn gen_info_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = get_sudo(manager.clone());
+    let mut command: std::process::Command = Command::new(manager.clone());
     match manager.as_str() {
         "apt" => {
             command.arg("show");
@@ -73,42 +53,42 @@ mod tests {
     fn test_gen_info_syntax_apt() {
         let cmd = gen_info_syntax("apt".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apt", "show"]);
+        assert_eq!(args, vec!["apt", "show"]);
     }
 
     #[test]
     fn test_gen_info_syntax_dnf() {
         let cmd = gen_info_syntax("dnf".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "dnf", "info"]);
+        assert_eq!(args, vec!["dnf", "info"]);
     }
 
     #[test]
     fn test_gen_info_syntax_pacman() {
         let cmd = gen_info_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "pacman", "-Qi"]);
+        assert_eq!(args, vec!["pacman", "-Qi"]);
     }
 
     #[test]
     fn test_gen_info_syntax_zypper() {
         let cmd = gen_info_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "zypper", "info"]);
+        assert_eq!(args, vec!["zypper", "info"]);
     }
 
     #[test]
     fn test_gen_info_syntax_apk() {
         let cmd = gen_info_syntax("apk".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apk", "info"]);
+        assert_eq!(args, vec!["apk", "info"]);
     }
 
     #[test]
     fn test_gen_info_syntax_portage() {
         let cmd = gen_info_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "portage", "info"]);
+        assert_eq!(args, vec!["portage", "info"]);
     }
 
     #[test]
