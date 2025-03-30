@@ -1,33 +1,7 @@
 use std::process::Command;
 
-use crate::root::get_sudo;
-
-pub fn reinstall(manager: String, package: String, silent: bool, verbose: bool) {
-    if package.is_empty() {
-        eprintln!("Usage: reinstall <package>");
-        return;
-    }
-
-    if !silent {
-        println!("yu: Reinstalling package: {}", package);
-    }
-
-    let mut reinstall_cmd = gen_reinstall_syntax(manager.clone())
-        .arg(package)
-        .stdout(if verbose {
-            std::process::Stdio::inherit()
-        } else {
-            std::process::Stdio::null()
-        })
-        .stderr(std::process::Stdio::inherit())
-        .spawn()
-        .expect("yu: Failed to execute command");
-
-    reinstall_cmd.wait().expect("Command wasn't running");
-}
-
 pub fn gen_reinstall_syntax(manager: String) -> std::process::Command {
-    let mut command: std::process::Command = get_sudo(manager.clone());
+    let mut command: std::process::Command = Command::new(manager.clone());
     match manager.as_str() {
         "apt" | "dnf" | "yum" => {
             command.arg("reinstall");
@@ -47,8 +21,7 @@ pub fn gen_reinstall_syntax(manager: String) -> std::process::Command {
             command.arg("-f");
         }
         "portage" => {
-            command = Command::new("sudo");
-            command.arg("emerge");
+            command = Command::new("emerge");
             command.arg("--oneshot");
         }
         "brew" => {
@@ -81,42 +54,42 @@ mod tests {
     fn test_gen_reinstall_syntax_apt() {
         let cmd = gen_reinstall_syntax("apt".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apt", "reinstall", "-y"]);
+        assert_eq!(args, vec!["apt", "reinstall", "-y"]);
     }
 
     #[test]
     fn test_gen_reinstall_syntax_dnf() {
         let cmd = gen_reinstall_syntax("dnf".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "dnf", "reinstall", "-y"]);
+        assert_eq!(args, vec!["dnf", "reinstall", "-y"]);
     }
 
     #[test]
     fn test_gen_reinstall_syntax_pacman() {
         let cmd = gen_reinstall_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "pacman", "-S", "--overwrite", "*"]);
+        assert_eq!(args, vec!["pacman", "-S", "--overwrite", "*"]);
     }
 
     #[test]
     fn test_gen_reinstall_syntax_zypper() {
         let cmd = gen_reinstall_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "zypper", "install", "-y"]);
+        assert_eq!(args, vec!["zypper", "install", "-y"]);
     }
 
     #[test]
     fn test_gen_reinstall_syntax_apk() {
         let cmd = gen_reinstall_syntax("apk".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "apk", "add", "-f"]);
+        assert_eq!(args, vec!["apk", "add", "-f"]);
     }
 
     #[test]
     fn test_gen_reinstall_syntax_portage() {
         let cmd = gen_reinstall_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["sudo", "emerge", "--oneshot"]);
+        assert_eq!(args, vec!["emerge", "--oneshot"]);
     }
 
     #[test]

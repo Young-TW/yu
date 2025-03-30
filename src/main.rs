@@ -14,6 +14,9 @@ mod command {
     pub mod upgrade;
 }
 
+use root::get_sudo;
+use std::process::Command as SysCommand;
+
 fn main() {
     let matches = Command::new("yu")
         .version(env!("CARGO_PKG_VERSION"))
@@ -64,14 +67,62 @@ fn main() {
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
     match command {
-        "autoremove" => command::autoremove::autoremove(package_manager, silent),
-        "info" => command::info::info(package_manager, package, silent),
-        "install" => command::install::install(package_manager, package, silent, verbose),
-        "uninstall" => command::uninstall::uninstall(package_manager, package, silent, verbose),
-        "reinstall" => command::reinstall::reinstall(package_manager, package, silent, verbose),
-        "upgrade" => command::upgrade::upgrade(package_manager, silent, verbose),
-        "update" => command::update::update(package_manager, silent, verbose),
-        "list" => command::list::list(package_manager),
+        "autoremove" => {
+            let raw = command::autoremove::gen_autoremove_syntax(package_manager.clone());
+            run_package_command(raw, "autoremove", silent, verbose, package);
+        }
+        "upgrade" => {
+            let raw = command::upgrade::gen_upgrade_syntax(package_manager.clone());
+            run_package_command(raw, "upgrade", silent, verbose, package);
+        }
+        "update" => {
+            let raw = command::update::gen_update_syntax(package_manager.clone());
+            run_package_command(raw, "update", silent, verbose, package);
+        }
+        "install" => {
+            let raw = command::install::gen_install_syntax(package_manager.clone());
+            run_package_command(raw, "install", silent, verbose, package);
+        }
+        "uninstall" => {
+            let raw = command::uninstall::gen_uninstall_syntax(package_manager.clone());
+            run_package_command(raw, "uninstall", silent, verbose, package);
+        }
+        "reinstall" => {
+            let raw = command::reinstall::gen_reinstall_syntax(package_manager.clone());
+            run_package_command(raw, "reinstall", silent, verbose, package);
+        }
+        "info" => {
+            let raw = command::info::gen_info_syntax(package_manager.clone());
+            run_package_command(raw, "info", silent, verbose, package);
+        }
+        "list" => {
+            let raw = command::list::gen_list_syntax(package_manager.clone());
+            run_package_command(raw, "list", silent, verbose, package);
+        }
         _ => eprintln!("Unknown command: {}", command),
+    }
+}
+
+fn run_package_command(mut cmd: SysCommand, action: &str, silent: bool, verbose: bool, package: String) {
+    if !package.is_empty() {
+        cmd.arg(&package);
+    }
+    use std::process::Stdio;
+
+    // 控制輸出
+    if silent {
+        cmd.stdout(Stdio::null()).stderr(Stdio::null());
+    } else if !verbose {
+        cmd.stdout(Stdio::inherit()).stderr(Stdio::inherit());
+    }
+
+    let mut cmd = get_sudo(cmd);
+
+    let status = cmd.status().expect(&format!("failed to {}", action));
+
+    if status.success() && !silent {
+        println!("yu: {} succeeded", action);
+    } else if !status.success() {
+        eprintln!("yu: {} failed", action);
     }
 }
