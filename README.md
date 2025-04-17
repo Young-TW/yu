@@ -93,6 +93,12 @@ auto remove unused packages:
 yu autoremove
 ```
 
+search package:
+
+```bash
+yu search <package>
+```
+
 ### Flags
 
 - `-h`, `--help`: Show help message.
