@@ -81,6 +81,10 @@ fn main() {
             let raw = command::reinstall::gen_reinstall_syntax(package_manager.clone());
             run_package_command(raw, "reinstall", silent, verbose, package);
         }
+        "search" => {
+            let raw = command::search::gen_search_syntax(package_manager.clone());
+            run_package_command(raw, "search", silent, verbose, package);
+        }
         "info" => {
             let raw = command::info::gen_info_syntax(package_manager.clone());
             run_package_command(raw, "info", silent, verbose, package);
