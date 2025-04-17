@@ -1,5 +1,5 @@
 [package]
-name = "yu"
+name = "yu-pkg"
 version = "0.2.0"
 edition = "2021"
 
@@ -14,3 +14,7 @@ categories = ["command-line-utilities"]
 clap = { version = "4.0", features = ["derive"] }
 which = "7.0.2"
 whoami = "1.6.0"
+
+[[bin]]
+name = "yu"
+path = "src/main.rs"
