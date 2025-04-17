@@ -96,6 +96,6 @@ yu autoremove
 ### Flags
 
 - `-h`, `--help`: Show help message.
-- `-v`, `--version`: Show version.
-- `-V`, `--verbose`: Show verbose output.
-- `-S`, `--silent`: Show no output(only error output).
+- `-V`, `--version`: Show version.
+- `-v`, `--verbose`: Show verbose output.
+- `-s`, `--silent`: Show no output(only error output).
