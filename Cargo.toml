@@ -3,6 +3,13 @@ name = "yu"
 version = "0.2.0"
 edition = "2021"
 
+description = "A cross-platform package manager wrapper that detects and uses the system's native package manager"
+license = "GPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/Young-TW/yu"
+keywords = ["package-manager", "cli", "wrapper"]
+categories = ["command-line-utilities"]
+
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 which = "7.0.2"
