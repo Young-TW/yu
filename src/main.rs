@@ -1,18 +1,8 @@
 use clap::{Arg, Command};
 
-mod env;
 mod root;
-
-mod command {
-    pub mod autoremove;
-    pub mod info;
-    pub mod install;
-    pub mod list;
-    pub mod reinstall;
-    pub mod uninstall;
-    pub mod update;
-    pub mod upgrade;
-}
+mod command;
+mod env;
 
 use root::get_sudo;
 use std::process::Command as SysCommand;
