@@ -2,15 +2,7 @@
 
 `yu` allows users to use the same command to install, uninstall, and upgrade packages on all unix-like systems.
 
-## Installation
-
-This script will clone the repository, build the `yu` package, and install it to your system.
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh | bash
-```
-
-## Supported package managers
+## Supported native package managers
 
 - [x] `apt`
 - [x] `dnf`
@@ -20,6 +12,16 @@ curl -sSL https://raw.githubusercontent.com/Young-TW/yu/main/script/install.sh |
 - [x] `zypper`
 - [x] `portage`
 - [x] `apk`
+
+## Installation
+
+### Using cargo
+
+If you have `cargo` installed, you can install `yu` using the following command:
+
+```bash
+cargo install yu-pkg
+```
 
 ### Build from source manually
 
