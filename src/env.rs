@@ -1,19 +1,24 @@
+use std::path::Path;
+
 pub fn detect_package_manager() -> String {
-    if std::path::Path::new("/usr/bin/apt").exists() {
+    if Path::new("/usr/bin/apt").exists() {
         "apt".to_string()
-    } else if std::path::Path::new("/usr/bin/dnf").exists() {
+    } else if Path::new("/usr/bin/dnf").exists() {
         "dnf".to_string()
-    } else if std::path::Path::new("/usr/bin/yum").exists() {
+    } else if Path::new("/usr/bin/yum").exists() {
         "yum".to_string()
-    } else if std::path::Path::new("/opt/homebrew/bin/brew").exists() {
+    } else if Path::new("/opt/homebrew/bin/brew").exists()
+        || Path::new("/usr/local/bin/brew").exists()
+        || Path::new("/home/linuxbrew/.linuxbrew/bin/brew").exists()
+    {
         "brew".to_string()
-    } else if std::path::Path::new("/usr/bin/zypper").exists() {
+    } else if Path::new("/usr/bin/zypper").exists() {
         "zypper".to_string()
-    } else if std::path::Path::new("/usr/bin/pacman").exists() {
+    } else if Path::new("/usr/bin/pacman").exists() {
         "pacman".to_string()
-    } else if std::path::Path::new("/usr/bin/apk").exists() {
+    } else if Path::new("/usr/bin/apk").exists() {
         "apk".to_string()
-    } else if std::path::Path::new("/usr/bin/portage").exists() {
+    } else if Path::new("/usr/bin/emerge").exists() {
         "portage".to_string()
     } else {
         "unknown".to_string()

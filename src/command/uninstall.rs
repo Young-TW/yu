@@ -17,7 +17,7 @@ pub fn gen_uninstall_syntax(manager: String) -> std::process::Command {
         }
         "pacman" => {
             command.arg("-R");
-            command.arg("-y");
+            command.arg("--noconfirm");
         }
         "brew" => {
             command.arg("uninstall");
@@ -64,7 +64,7 @@ mod tests {
     fn test_gen_uninstall_syntax_pacman() {
         let cmd = gen_uninstall_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["pacman", "-R", "-y"]);
+        assert_eq!(args, vec!["pacman", "-R", "--noconfirm"]);
     }
 
     #[test]

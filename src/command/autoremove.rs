@@ -14,6 +14,7 @@ pub fn gen_autoremove_syntax(manager: String) -> std::process::Command {
         }
         "pacman" => {
             command.arg("-Rns");
+            command.arg("--noconfirm");
         }
         "zypper" => {
             command.arg("remove");
@@ -74,7 +75,7 @@ mod tests {
     fn test_gen_autoremove_syntax_pacman() {
         let cmd = gen_autoremove_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["pacman", "-Rns"]);
+        assert_eq!(args, vec!["pacman", "-Rns", "--noconfirm"]);
     }
 
     #[test]
