@@ -17,8 +17,9 @@ pub fn get_sudo(cmd: std::process::Command) -> std::process::Command {
     if let Ok(path) = which(&program) {
         let abs_path = path.to_string_lossy().to_string();
 
+        let version_arg = if program == "pacman" { "-V" } else { "--version" };
         let check_status = Command::new("sudo")
-            .args(["-n", &abs_path, "--version"])
+            .args(["-n", &abs_path, version_arg])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status();
@@ -35,6 +36,7 @@ pub fn get_sudo(cmd: std::process::Command) -> std::process::Command {
             if let Err(e) = setup_sudoers_rule(abs_path.clone()) {
                 eprintln!("yu: failed to set up sudoers rule: {}", e);
                 eprintln!("please ensure you have permission to write to /etc/sudoers.d/uni-pkg");
+                std::process::exit(1);
             }
         }
 

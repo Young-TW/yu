@@ -4,15 +4,19 @@ pub fn gen_install_syntax(manager: String) -> std::process::Command {
     let mut command: std::process::Command = Command::new(manager.clone());
     // add arguments
     match manager.as_str() {
-        "apt" | "dnf" | "yum" | "pacman" | "zypper" => {
+        "apt" | "dnf" | "yum" | "zypper" => {
             command.arg("install");
             command.arg("-y");
+        }
+        "pacman" => {
+            command.arg("-S");
+            command.arg("--noconfirm");
         }
         "apk" => {
             command.arg("add");
         }
         "portage" => {
-            command.arg("emerge");
+            command = Command::new("emerge");
         }
         "brew" => {
             command.arg("install");
@@ -63,7 +67,7 @@ mod tests {
     fn test_gen_install_syntax_pacman() {
         let cmd = gen_install_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["pacman", "install", "-y"]);
+        assert_eq!(args, vec!["pacman", "-S", "--noconfirm"]);
     }
 
     #[test]
@@ -84,7 +88,7 @@ mod tests {
     fn test_gen_install_syntax_portage() {
         let cmd = gen_install_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["portage", "emerge"]);
+        assert_eq!(args, vec!["emerge"]);
     }
 
     #[test]

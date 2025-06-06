@@ -40,7 +40,7 @@ fn main() {
         .get_matches();
 
     let package_manager = env::detect_package_manager();
-    if package_manager == "Unknown" {
+    if package_manager == "unknown" {
         eprintln!("Unknown package manager");
         return;
     }
@@ -106,11 +106,14 @@ fn run_package_command(mut cmd: SysCommand, action: &str, silent: bool, verbose:
     // 控制輸出
     if silent {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
-    } else if !verbose {
+    } else {
         cmd.stdout(Stdio::inherit()).stderr(Stdio::inherit());
     }
 
     let mut cmd = get_sudo(cmd);
+    if verbose && !silent {
+        eprintln!("yu: running {:?}", cmd);
+    }
 
     let status = cmd.status().expect(&format!("failed to {}", action));
 

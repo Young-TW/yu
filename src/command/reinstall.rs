@@ -9,8 +9,7 @@ pub fn gen_reinstall_syntax(manager: String) -> std::process::Command {
         }
         "pacman" => {
             command.arg("-S");
-            command.arg("--overwrite");
-            command.arg("*");
+            command.arg("--noconfirm");
         }
         "zypper" => {
             command.arg("install");
@@ -68,7 +67,7 @@ mod tests {
     fn test_gen_reinstall_syntax_pacman() {
         let cmd = gen_reinstall_syntax("pacman".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["pacman", "-S", "--overwrite", "*"]);
+        assert_eq!(args, vec!["pacman", "-S", "--noconfirm"]);
     }
 
     #[test]
