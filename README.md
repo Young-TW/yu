@@ -107,3 +107,7 @@ yu search <package>
 - `-V`, `--version`: Show version.
 - `-v`, `--verbose`: Show verbose output.
 - `-s`, `--silent`: Show no output(only error output).
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/789e96f4a8ee75e44d631fb61bb7fa1aa348f476.svg "Repobeats analytics image")
