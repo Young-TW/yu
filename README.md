@@ -2,7 +2,9 @@
 
 `yu` allows users to use the same command to install, uninstall, and upgrade packages on all unix-like systems.
 
-## Supported native package managers
+## Supported package managers
+
+### Native
 
 - [x] `apt`
 - [x] `dnf`
@@ -12,6 +14,30 @@
 - [x] `zypper`
 - [x] `portage`
 - [x] `apk`
+
+### Sandbox / Snapshot
+
+- [ ] `flatpak`
+- [ ] `snap`
+- [ ] `nix`
+- [ ] `guix`
+
+### Domain-Specific
+
+- [ ] `conda` (Anaconda)
+  - [ ] `pixi` (Pixi)
+- [ ] `spack` (Scientific computing)
+
+### Language-Specific
+
+- [ ] `cargo` (Rust)
+- [ ] `npm` (Node.js)
+  - [ ] `pnpm` (Node.js)
+- [ ] `pip` (Python)
+  - [ ] `pipx` (Python)
+  - [ ] `uv` (Python)
+- [ ] `conan` (C/C++)
+- [ ] `vcpkg` (C/C++)
 
 ## Installation
 
