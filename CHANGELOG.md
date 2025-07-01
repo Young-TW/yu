@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-07-02
+
+### Added
+
+- build multi platform executable in CI
+- sudoers rule for origin package manager(only input password once)
+- fish install script
+- ChangeLog file
+
 ## [0.2.0] - 2025-02-02
 
 This version is the first version published on crates.io.
@@ -26,5 +35,6 @@ This version is the first version published on crates.io.
 
 - Initial release
 
+[0.3.0]: https://github.com/Young-TW/yu/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Young-TW/yu/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Young-TW/yu/releases/tag/v0.1.0
