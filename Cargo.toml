@@ -1,6 +1,6 @@
 [package]
 name = "yu-pkg"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 description = "A cross-platform package manager wrapper that detects and uses the system's native package manager"
