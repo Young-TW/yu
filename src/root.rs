@@ -24,10 +24,21 @@ pub fn get_sudo(cmd: std::process::Command) -> std::process::Command {
             .stderr(Stdio::null())
             .status();
 
-        let needs_setup = match check_status {
-            Ok(status) => !status.success(),
-            Err(_) => true,
-        };
+        if check_status.is_ok() && check_status.unwrap().success() {
+            // if sudo is already set up, return the command with sudo
+            let mut sudo_cmd = Command::new("sudo");
+            sudo_cmd.arg(&abs_path);
+            sudo_cmd.args(cmd.get_args());
+            return sudo_cmd;
+        }
+
+        println!("yu: Do you want to set up sudoers for {} (y/n)?", program);
+        let mut input = String::new();
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+        let needs_setup = input.trim().eq_ignore_ascii_case("y") ||
+            input.trim().eq_ignore_ascii_case("yes");
 
         if needs_setup {
             println!("yu: setting up a sudoers rule for {}", program);
