@@ -2,6 +2,8 @@
 
 `yu` allows users to use the same command to install, uninstall, and upgrade packages on all unix-like systems.
 
+![CI/CD](https://github.com/Young-TW/yu/actions/workflows/rust.yml/badge.svg)
+
 ## Supported package managers
 
 ### Native
