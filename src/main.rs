@@ -5,9 +5,9 @@ mod command;
 mod env;
 
 use root::get_sudo;
-use std::process::Command as SysCommand;
+use std::process::{Command as SysCommand, ExitCode};
 
-fn main() {
+fn main() -> ExitCode {
     let matches = Command::new("yu")
         .version(env!("CARGO_PKG_VERSION"))
         .about("A simple package manager wrapper")
@@ -41,8 +41,8 @@ fn main() {
 
     let package_manager = env::detect_package_manager();
     if package_manager == "unknown" {
-        eprintln!("Unknown package manager");
-        return;
+        eprintln!("yu: unknown package manager");
+        return ExitCode::FAILURE;
     }
 
     let command = matches
@@ -51,17 +51,26 @@ fn main() {
         .unwrap_or("upgrade");
     let package = matches
         .get_one::<String>("package")
-        .unwrap_or(&"".to_string())
-        .to_string();
+        .cloned()
+        .unwrap_or_default();
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
     match command {
         // Security-sensitive, explicitly opt-in: never reached automatically.
-        "setup-sudo" => root::setup_sudo(&package_manager),
+        "setup-sudo" => {
+            if root::setup_sudo(&package_manager) {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            }
+        }
         other => match build_command(other, &package_manager) {
-            Some(raw) => run_package_command(raw, other, silent, verbose, package),
-            None => eprintln!("Unknown command: {}", other),
+            Some(raw) => run_package_command(raw, other, silent, verbose, &package),
+            None => {
+                eprintln!("yu: unknown command: {other}");
+                ExitCode::FAILURE
+            }
         },
     }
 }
@@ -114,22 +123,55 @@ fn execute(
     cmd.status()
 }
 
-fn run_package_command(cmd: SysCommand, action: &str, silent: bool, verbose: bool, package: String) {
-    match execute(cmd, &package, silent, verbose) {
+fn run_package_command(
+    cmd: SysCommand,
+    action: &str,
+    silent: bool,
+    verbose: bool,
+    package: &str,
+) -> ExitCode {
+    match execute(cmd, package, silent, verbose) {
         Ok(status) => {
-            if status.success() && !silent {
-                println!("yu: {} succeeded", action);
-            } else if !status.success() {
-                eprintln!("yu: {} failed", action);
+            if status.success() {
+                if !silent {
+                    println!("yu: {action} succeeded");
+                }
+            } else {
+                eprintln!("yu: {action} failed");
             }
+            // Surface the child's own exit code so scripts can detect failure.
+            ExitCode::from(exit_code(status))
         }
-        Err(e) => eprintln!("yu: failed to {}: {}", action, e),
+        Err(e) => {
+            eprintln!("yu: failed to {action}: {e}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// Translates a finished child's status into a process exit code, preserving
+/// the child's own code where available (0 on success, the reported code on
+/// failure, or 1 when it was terminated without one, e.g. by a signal).
+fn exit_code(status: std::process::ExitStatus) -> u8 {
+    if status.success() {
+        0
+    } else {
+        status.code().map(|c| c as u8).unwrap_or(1)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exit_code_preserves_child_status() {
+        let ok = SysCommand::new("true").status().expect("spawn true");
+        assert_eq!(exit_code(ok), 0);
+
+        let fail = SysCommand::new("false").status().expect("spawn false");
+        assert_eq!(exit_code(fail), 1);
+    }
 
     #[test]
     fn build_command_dispatches_known_subcommands() {

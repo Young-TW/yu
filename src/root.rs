@@ -69,14 +69,18 @@ pub fn privileged_executable(manager: &str) -> Option<&'static str> {
 /// passwordless-`sudo` rule for the detected package manager, which is a
 /// security-sensitive action, so it always warns and asks for confirmation
 /// and is never triggered automatically by other commands.
-pub fn setup_sudo(manager: &str) {
+///
+/// Returns `false` only when a requested setup actually failed, so the caller
+/// can exit non-zero. A clean user abort, or a manager that needs no sudo,
+/// counts as success (nothing went wrong).
+pub fn setup_sudo(manager: &str) -> bool {
     use which::which;
 
     let exe = match privileged_executable(manager) {
         Some(exe) => exe,
         None => {
             eprintln!("yu: {manager} does not run under sudo; nothing to set up");
-            return;
+            return true;
         }
     };
 
@@ -84,7 +88,7 @@ pub fn setup_sudo(manager: &str) {
         Ok(path) => path.to_string_lossy().to_string(),
         Err(_) => {
             eprintln!("yu: cannot find `{exe}` on PATH");
-            return;
+            return false;
         }
     };
 
@@ -100,17 +104,23 @@ pub fn setup_sudo(manager: &str) {
     let mut input = String::new();
     if std::io::stdin().read_line(&mut input).is_err() {
         eprintln!("yu: could not read confirmation; aborting");
-        return;
+        return false;
     }
     let confirmed = matches!(input.trim().to_ascii_lowercase().as_str(), "y" | "yes");
     if !confirmed {
         println!("yu: aborted; no changes made");
-        return;
+        return true;
     }
 
     match setup_sudoers_rule(&exe_path) {
-        Ok(()) => println!("yu: installed sudoers rule at {SUDOERS_PATH}"),
-        Err(e) => eprintln!("yu: failed to set up sudoers rule: {e}"),
+        Ok(()) => {
+            println!("yu: installed sudoers rule at {SUDOERS_PATH}");
+            true
+        }
+        Err(e) => {
+            eprintln!("yu: failed to set up sudoers rule: {e}");
+            false
+        }
     }
 }
 
@@ -139,10 +149,11 @@ pub fn setup_sudoers_rule(exe_path: &str) -> std::io::Result<()> {
         .stdin(Stdio::piped())
         .stdout(Stdio::null())
         .spawn()?;
-    tee.stdin
-        .take()
-        .expect("piped stdin is always present")
-        .write_all(rule.as_bytes())?;
+    let mut stdin = tee.stdin.take().ok_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::BrokenPipe, "could not open sudo stdin")
+    })?;
+    stdin.write_all(rule.as_bytes())?;
+    drop(stdin); // close the pipe so `tee` sees EOF and exits
     if !tee.wait()?.success() {
         return Err(std::io::Error::new(
             std::io::ErrorKind::PermissionDenied,

@@ -44,9 +44,11 @@ fn unknown_subcommand_reports_an_error_without_crashing() {
     // the problem on stderr and neither should panic.
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("Unknown"),
-        "expected an 'Unknown' diagnostic, got stderr: {stderr}"
+        stderr.to_lowercase().contains("unknown"),
+        "expected an 'unknown' diagnostic, got stderr: {stderr}"
     );
+    // An unrecognised request must surface as a non-zero exit code.
+    assert!(!output.status.success());
 }
 
 #[test]

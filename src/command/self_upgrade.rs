@@ -9,16 +9,16 @@ pub fn self_upgrade(manager: &str) -> Result<Command, String> {
 
     match manager {
         "npm" => {
-            cmd.args(&["install", "-g", "npm"]);
+            cmd.args(["install", "-g", "npm"]);
         }
         "pnpm" => {
             cmd.arg("self-update");
         }
         "pip" => {
-            cmd.args(&["install", "--upgrade", "pip"]);
+            cmd.args(["install", "--upgrade", "pip"]);
         }
         "pipx" => {
-            cmd.args(&["upgrade", "pipx"]);
+            cmd.args(["upgrade", "pipx"]);
         }
         "uv" => {
             cmd.arg("self-upgrade");
@@ -26,7 +26,7 @@ pub fn self_upgrade(manager: &str) -> Result<Command, String> {
         "cargo" => {
             // 改用 rustup 更新 cargo 本身
             cmd = Command::new("rustup");
-            cmd.args(&["self", "update"]);
+            cmd.args(["self", "update"]);
         }
         _ => {
             return Err(format!("不支援的套件管理器：{}", manager));
