@@ -174,7 +174,9 @@ pub fn setup_sudoers_rule(exe_path: &str) -> std::io::Result<()> {
 
     if !valid {
         // Never leave an unvalidated fragment behind.
-        let _ = Command::new("sudo").args(["rm", "-f", SUDOERS_PATH]).status();
+        let _ = Command::new("sudo")
+            .args(["rm", "-f", SUDOERS_PATH])
+            .status();
         return Err(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
             "generated sudoers rule failed validation",

@@ -1,8 +1,8 @@
 use clap::{Arg, Command};
 
-mod root;
 mod command;
 mod env;
+mod root;
 
 use root::get_sudo;
 use std::process::{Command as SysCommand, ExitCode};

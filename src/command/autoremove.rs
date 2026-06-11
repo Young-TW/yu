@@ -107,4 +107,3 @@ mod tests {
         assert_eq!(args, vec!["brew", "cleanup"]);
     }
 }
-
