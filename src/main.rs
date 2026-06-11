@@ -56,52 +56,44 @@ fn main() {
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
-    match command {
-        "autoremove" => {
-            let raw = command::autoremove::gen_autoremove_syntax(package_manager.clone());
-            run_package_command(raw, "autoremove", silent, verbose, package);
-        }
-        "upgrade" => {
-            let raw = command::upgrade::gen_upgrade_syntax(package_manager.clone());
-            run_package_command(raw, "upgrade", silent, verbose, package);
-        }
-        "update" => {
-            let raw = command::update::gen_update_syntax(package_manager.clone());
-            run_package_command(raw, "update", silent, verbose, package);
-        }
-        "install" => {
-            let raw = command::install::gen_install_syntax(package_manager.clone());
-            run_package_command(raw, "install", silent, verbose, package);
-        }
-        "uninstall" => {
-            let raw = command::uninstall::gen_uninstall_syntax(package_manager.clone());
-            run_package_command(raw, "uninstall", silent, verbose, package);
-        }
-        "reinstall" => {
-            let raw = command::reinstall::gen_reinstall_syntax(package_manager.clone());
-            run_package_command(raw, "reinstall", silent, verbose, package);
-        }
-        "search" => {
-            let raw = command::search::gen_search_syntax(package_manager.clone());
-            run_package_command(raw, "search", silent, verbose, package);
-        }
-        "info" => {
-            let raw = command::info::gen_info_syntax(package_manager.clone());
-            run_package_command(raw, "info", silent, verbose, package);
-        }
-        "list" => {
-            let raw = command::list::gen_list_syntax(package_manager.clone());
-            run_package_command(raw, "list", silent, verbose, package);
-        }
-        _ => eprintln!("Unknown command: {}", command),
+    match build_command(command, &package_manager) {
+        Some(raw) => run_package_command(raw, command, silent, verbose, package),
+        None => eprintln!("Unknown command: {}", command),
     }
 }
 
-fn run_package_command(mut cmd: SysCommand, action: &str, silent: bool, verbose: bool, package: String) {
-    if !package.is_empty() {
-        cmd.arg(&package);
-    }
+/// Maps a user-facing subcommand and package manager to the raw system
+/// command to run, or `None` if the subcommand is not recognised.
+fn build_command(command: &str, manager: &str) -> Option<SysCommand> {
+    let pm = manager.to_string();
+    let cmd = match command {
+        "autoremove" => command::autoremove::gen_autoremove_syntax(pm),
+        "upgrade" => command::upgrade::gen_upgrade_syntax(pm),
+        "update" => command::update::gen_update_syntax(pm),
+        "install" => command::install::gen_install_syntax(pm),
+        "uninstall" => command::uninstall::gen_uninstall_syntax(pm),
+        "reinstall" => command::reinstall::gen_reinstall_syntax(pm),
+        "search" => command::search::gen_search_syntax(pm),
+        "info" => command::info::gen_info_syntax(pm),
+        "list" => command::list::gen_list_syntax(pm),
+        _ => return None,
+    };
+    Some(cmd)
+}
+
+/// Appends the optional package argument, wraps the command in `sudo` when
+/// required, and spawns it, returning the child's exit status.
+fn execute(
+    mut cmd: SysCommand,
+    package: &str,
+    silent: bool,
+    verbose: bool,
+) -> std::io::Result<std::process::ExitStatus> {
     use std::process::Stdio;
+
+    if !package.is_empty() {
+        cmd.arg(package);
+    }
 
     // 控制輸出
     if silent {
@@ -115,11 +107,68 @@ fn run_package_command(mut cmd: SysCommand, action: &str, silent: bool, verbose:
         eprintln!("yu: running {:?}", cmd);
     }
 
-    let status = cmd.status().expect(&format!("failed to {}", action));
+    cmd.status()
+}
 
-    if status.success() && !silent {
-        println!("yu: {} succeeded", action);
-    } else if !status.success() {
-        eprintln!("yu: {} failed", action);
+fn run_package_command(cmd: SysCommand, action: &str, silent: bool, verbose: bool, package: String) {
+    match execute(cmd, &package, silent, verbose) {
+        Ok(status) => {
+            if status.success() && !silent {
+                println!("yu: {} succeeded", action);
+            } else if !status.success() {
+                eprintln!("yu: {} failed", action);
+            }
+        }
+        Err(e) => eprintln!("yu: failed to {}: {}", action, e),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn build_command_dispatches_known_subcommands() {
+        let cmd = build_command("install", "apt").expect("install should be known");
+        assert_eq!(cmd.get_program().to_string_lossy(), "apt");
+
+        let cmd = build_command("upgrade", "pacman").expect("upgrade should be known");
+        assert_eq!(cmd.get_program().to_string_lossy(), "pacman");
+    }
+
+    #[test]
+    fn build_command_returns_none_for_unknown_subcommand() {
+        assert!(build_command("frobnicate", "apt").is_none());
+    }
+
+    #[test]
+    fn execute_spawns_and_reports_success() {
+        // Actually launches a child process and observes its real exit status.
+        let status = execute(SysCommand::new("true"), "", true, false)
+            .expect("spawning `true` should not fail");
+        assert!(status.success());
+    }
+
+    #[test]
+    fn execute_spawns_and_reports_failure() {
+        let status = execute(SysCommand::new("false"), "", true, false)
+            .expect("spawning `false` should not fail");
+        assert!(!status.success());
+    }
+
+    #[test]
+    fn execute_appends_package_argument_and_still_spawns() {
+        // `true` ignores its arguments, but the command must still spawn and
+        // succeed once a package argument has been appended.
+        let status = execute(SysCommand::new("true"), "somepkg", true, false)
+            .expect("spawning `true somepkg` should not fail");
+        assert!(status.success());
+    }
+
+    #[test]
+    fn execute_surfaces_spawn_errors_instead_of_panicking() {
+        // A binary that does not exist must yield an `Err`, not a panic.
+        let result = execute(SysCommand::new("yu-no-such-binary-xyz"), "", true, false);
+        assert!(result.is_err());
     }
 }
