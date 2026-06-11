@@ -1,16 +1,25 @@
 use std::process::Command;
 
+/// Returns whether running `program` requires elevated privileges.
+///
+/// Note: this matches the *actual* executable name produced by the
+/// `gen_*_syntax` helpers, not the package-manager identifier. Gentoo's
+/// `portage` is driven through `emerge`/`qlist`, so `emerge` is the name we
+/// match here. `brew` intentionally runs without `sudo`.
+pub fn needs_sudo(program: &str) -> bool {
+    matches!(
+        program,
+        "apt" | "dnf" | "yum" | "pacman" | "zypper" | "apk" | "emerge"
+    )
+}
+
 pub fn get_sudo(cmd: std::process::Command) -> std::process::Command {
     use std::process::{Command, Stdio};
     use which::which;
 
     let program = cmd.get_program().to_string_lossy().to_string();
-    let needs_sudo = matches!(
-        program.as_str(),
-        "apt" | "dnf" | "yum" | "pacman" | "zypper" | "apk" | "portage"
-    );
 
-    if !needs_sudo {
+    if !needs_sudo(&program) {
         return cmd;
     }
 
@@ -88,4 +97,36 @@ pub fn setup_sudoers_rule(command: String) -> std::io::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn native_managers_need_sudo() {
+        for program in ["apt", "dnf", "yum", "pacman", "zypper", "apk", "emerge"] {
+            assert!(needs_sudo(program), "{program} should require sudo");
+        }
+    }
+
+    #[test]
+    fn brew_does_not_need_sudo() {
+        assert!(!needs_sudo("brew"));
+    }
+
+    #[test]
+    fn portage_helpers_match_actual_executables() {
+        // `gen_*_syntax` emits `emerge`/`qlist`, never a literal `portage`
+        // binary, so the identifier itself must not be treated as privileged.
+        assert!(!needs_sudo("portage"));
+        // qlist (package listing) is read-only and needs no elevation.
+        assert!(!needs_sudo("qlist"));
+    }
+
+    #[test]
+    fn unknown_program_does_not_need_sudo() {
+        assert!(!needs_sudo("unknown"));
+        assert!(!needs_sudo(""));
+    }
 }

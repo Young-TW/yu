@@ -22,7 +22,8 @@ pub fn gen_info_syntax(manager: String) -> std::process::Command {
             command.arg("info");
         }
         "portage" => {
-            command.arg("info");
+            command = Command::new("emerge");
+            command.arg("--info");
         }
         "brew" => {
             command.arg("info");
@@ -88,7 +89,7 @@ mod tests {
     fn test_gen_info_syntax_portage() {
         let cmd = gen_info_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["portage", "info"]);
+        assert_eq!(args, vec!["emerge", "--info"]);
     }
 
     #[test]

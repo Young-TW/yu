@@ -19,7 +19,8 @@ pub fn gen_update_syntax(manager: String) -> std::process::Command {
             command.arg("update");
         }
         "portage" => {
-            command.arg("sync");
+            command = Command::new("emerge");
+            command.arg("--sync");
         }
         "brew" => {
             command.arg("update");
@@ -81,7 +82,7 @@ mod tests {
     fn test_gen_update_syntax_portage() {
         let cmd = gen_update_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["portage", "sync"]);
+        assert_eq!(args, vec!["emerge", "--sync"]);
     }
 
     #[test]

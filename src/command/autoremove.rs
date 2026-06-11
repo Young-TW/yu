@@ -23,6 +23,7 @@ pub fn gen_autoremove_syntax(manager: String) -> std::process::Command {
             command.arg("autoremove");
         }
         "portage" => {
+            command = Command::new("emerge");
             command.arg("--depclean");
         }
         "brew" => {
@@ -96,7 +97,7 @@ mod tests {
     fn test_gen_autoremove_syntax_portage() {
         let cmd = gen_autoremove_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["portage", "--depclean"]);
+        assert_eq!(args, vec!["emerge", "--depclean"]);
     }
 
     #[test]

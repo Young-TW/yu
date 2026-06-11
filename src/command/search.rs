@@ -22,7 +22,8 @@ pub fn gen_search_syntax(manager: String) -> std::process::Command {
             command.arg("search");
         }
         "portage" => {
-            command.arg("search");
+            command = Command::new("emerge");
+            command.arg("--search");
         }
         "brew" => {
             command.arg("search");
@@ -94,7 +95,7 @@ mod tests {
     #[test]
     fn test_gen_search_syntax_portage() {
         let cmd = gen_search_syntax("portage".to_string());
-        let expected = vec!["portage", "search"];
+        let expected = vec!["emerge", "--search"];
         assert_eq!(cmd_to_string(&cmd), expected);
     }
 
