@@ -4,7 +4,7 @@
 //! binary, so these exercise argument parsing and dispatch for real without
 //! ever invoking a system package manager.
 
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 fn yu() -> Command {
     Command::new(env!("CARGO_BIN_EXE_yu"))
@@ -46,5 +46,28 @@ fn unknown_subcommand_reports_an_error_without_crashing() {
     assert!(
         stderr.contains("Unknown"),
         "expected an 'Unknown' diagnostic, got stderr: {stderr}"
+    );
+}
+
+#[test]
+fn setup_sudo_makes_no_changes_without_confirmation() {
+    // Closed stdin means the confirmation prompt reads EOF, so `setup-sudo`
+    // must abort without ever installing a sudoers rule. This pins down the
+    // security contract: nothing is granted unless the user explicitly says
+    // yes. (On hosts whose manager needs no sudo it reports that instead.)
+    let output = yu()
+        .arg("setup-sudo")
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to spawn yu");
+
+    let combined = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        combined.contains("aborted") || combined.contains("does not run under sudo"),
+        "expected a safe no-op, got: {combined}"
     );
 }

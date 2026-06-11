@@ -56,9 +56,13 @@ fn main() {
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
-    match build_command(command, &package_manager) {
-        Some(raw) => run_package_command(raw, command, silent, verbose, package),
-        None => eprintln!("Unknown command: {}", command),
+    match command {
+        // Security-sensitive, explicitly opt-in: never reached automatically.
+        "setup-sudo" => root::setup_sudo(&package_manager),
+        other => match build_command(other, &package_manager) {
+            Some(raw) => run_package_command(raw, other, silent, verbose, package),
+            None => eprintln!("Unknown command: {}", other),
+        },
     }
 }
 
