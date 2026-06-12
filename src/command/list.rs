@@ -27,8 +27,10 @@ pub fn gen_list_syntax(manager: String) -> std::process::Command {
             command.arg("--installed");
         }
         "portage" => {
-            command.arg("--list");
-            command.arg("world");
+            // emerge has no subcommand to list installed packages; qlist
+            // (from portage-utils) is the standard Gentoo tool for this.
+            command = Command::new("qlist");
+            command.arg("-Iv");
         }
         "brew" => {
             command.arg("list");
@@ -101,7 +103,7 @@ mod tests {
     fn test_gen_list_syntax_portage() {
         let cmd = gen_list_syntax("portage".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["portage", "--list", "world"]);
+        assert_eq!(args, vec!["qlist", "-Iv"]);
     }
 
     #[test]

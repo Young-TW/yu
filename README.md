@@ -129,6 +129,25 @@ search package:
 yu search <package>
 ```
 
+### Privileges
+
+Commands that modify the system (`install`, `uninstall`, `upgrade`, …) are
+run through `sudo`, which uses your system's normal authentication (it will
+prompt for a password unless you already have a valid sudo session). `yu`
+does not change your sudo policy on its own.
+
+If you want passwordless operation, opt in explicitly:
+
+```bash
+yu setup-sudo
+```
+
+This warns you, asks for confirmation, and—only if you agree—installs a
+validated `NOPASSWD` rule for the detected package manager at
+`/etc/sudoers.d/yu`. Because a package manager can run arbitrary code as
+root, this effectively grants passwordless root to your account; it is never
+set up automatically.
+
 ### Flags
 
 - `-h`, `--help`: Show help message.

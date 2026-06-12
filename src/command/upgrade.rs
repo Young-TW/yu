@@ -17,10 +17,11 @@ pub fn gen_upgrade_syntax(manager: String) -> std::process::Command {
             command.arg("upgrade");
         }
         "portage" => {
-            command.arg("world");
+            command = Command::new("emerge");
             command.arg("--update");
             command.arg("--deep");
             command.arg("--newuse");
+            command.arg("@world");
         }
         "brew" => {
             command.arg("upgrade");
@@ -85,7 +86,7 @@ mod tests {
         let args = cmd_to_string(&cmd);
         assert_eq!(
             args,
-            vec!["portage", "world", "--update", "--deep", "--newuse"]
+            vec!["emerge", "--update", "--deep", "--newuse", "@world"]
         );
     }
 
