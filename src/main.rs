@@ -65,6 +65,11 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         }
+        // pacman -Rns requires at least one package argument; autoremove must
+        // first query orphans with `pacman -Qdtq` and skip removal when none exist.
+        "autoremove" if package_manager == "pacman" => {
+            command::autoremove::run_pacman_autoremove(silent, verbose)
+        }
         other => match build_command(other, &package_manager) {
             Some(raw) => run_package_command(raw, other, silent, verbose, &package),
             None => {
