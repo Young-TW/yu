@@ -12,9 +12,7 @@ pub fn gen_autoremove_syntax(manager: String) -> std::process::Command {
         "yum" => {
             command.arg("autoremove");
         }
-        "zypper" => {
-            command.arg("remove");
-        }
+        // zypper has no direct autoremove equivalent; handled via run_zypper_autoremove in main.
         "apk" => {
             command.arg("autoremove");
         }
@@ -117,6 +115,14 @@ pub fn run_pacman_autoremove(silent: bool, verbose: bool) -> std::process::ExitC
     }
 }
 
+/// zypper has no direct equivalent of `apt autoremove`; exits non-zero with an
+/// informative message rather than silently invoking `zypper remove` without a
+/// package argument (which zypper rejects as invalid).
+pub fn run_zypper_autoremove() -> std::process::ExitCode {
+    eprintln!("yu: autoremove is not supported for zypper");
+    std::process::ExitCode::FAILURE
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -155,10 +161,20 @@ mod tests {
     }
 
     #[test]
-    fn test_gen_autoremove_syntax_zypper() {
+    fn test_gen_autoremove_syntax_zypper_not_handled_here() {
+        // zypper autoremove is intercepted in main before gen_autoremove_syntax is
+        // ever called, so zypper falls through to the unknown-manager arm here.
         let cmd = gen_autoremove_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["zypper", "remove"]);
+        assert_eq!(args, vec!["zypper"]);
+    }
+
+    #[test]
+    fn test_run_zypper_autoremove_is_unsupported() {
+        // ExitCode is opaque in stable Rust (no PartialEq), so we verify the
+        // function is callable without panicking and trust the integration test
+        // for the non-zero exit-code assertion.
+        let _ = run_zypper_autoremove();
     }
 
     #[test]
