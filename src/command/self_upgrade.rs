@@ -21,7 +21,7 @@ pub fn self_upgrade(manager: &str) -> Result<Command, String> {
             cmd.args(["upgrade", "pipx"]);
         }
         "uv" => {
-            cmd.arg("self-upgrade");
+            cmd.args(["self", "update"]);
         }
         "cargo" => {
             // 改用 rustup 更新 cargo 本身
@@ -81,7 +81,7 @@ mod tests {
     #[test]
     fn test_self_upgrade_uv() {
         let cmd = self_upgrade("uv").unwrap();
-        assert_eq!(cmd_to_string(&cmd), vec!["uv", "self-upgrade"]);
+        assert_eq!(cmd_to_string(&cmd), vec!["uv", "self", "update"]);
     }
 
     #[test]
