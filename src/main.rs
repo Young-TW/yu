@@ -70,6 +70,12 @@ fn main() -> ExitCode {
         "autoremove" if package_manager == "pacman" => {
             command::autoremove::run_pacman_autoremove(silent, verbose)
         }
+        // zypper has no direct autoremove equivalent; report unsupported rather
+        // than invoking `zypper remove` with no package argument (which zypper
+        // rejects as invalid).
+        "autoremove" if package_manager == "zypper" => {
+            command::autoremove::run_zypper_autoremove()
+        }
         other => match build_command(other, &package_manager) {
             Some(raw) => run_package_command(raw, other, silent, verbose, &package),
             None => {
