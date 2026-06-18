@@ -12,7 +12,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-which = "7.0.2"
+which = "8.0.4"
 whoami = "1.6.0"
 
 [[bin]]
