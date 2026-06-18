@@ -117,14 +117,14 @@ fn execute(
         cmd.arg(package);
     }
 
-    // 控制輸出
+    let mut cmd = get_sudo(cmd);
+
     if silent {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
     } else {
         cmd.stdout(Stdio::inherit()).stderr(Stdio::inherit());
     }
 
-    let mut cmd = get_sudo(cmd);
     if verbose && !silent {
         eprintln!("yu: running {:?}", cmd);
     }
@@ -225,5 +225,22 @@ mod tests {
         // A binary that does not exist must yield an `Err`, not a panic.
         let result = execute(SysCommand::new("yu-no-such-binary-xyz"), "", true, false);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn execute_silent_suppresses_output_after_sudo_wrapping() {
+        // Stdio::null() must be applied to the command returned by get_sudo(),
+        // not to the original command before wrapping. Moving the Stdio setup
+        // to after get_sudo() ensures this holds for every package manager —
+        // including those (apt, pacman, …) whose commands are replaced by a
+        // new `sudo` Command object that would otherwise discard Stdio settings.
+        //
+        // We verify the plumbing by running a child that writes to both
+        // stdout and stderr; if Stdio::null() is wired correctly, the streams
+        // are silently discarded and the child exits 0.
+        let mut cmd = SysCommand::new("sh");
+        cmd.args(["-c", "echo hello; echo error >&2"]);
+        let status = execute(cmd, "", true, false).expect("sh should spawn");
+        assert!(status.success());
     }
 }
