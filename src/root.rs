@@ -92,8 +92,15 @@ pub fn setup_sudo(manager: &str) -> bool {
         }
     };
 
+    let rule_preview = match sudoers_rule(&exe_path) {
+        Ok(rule) => rule,
+        Err(e) => {
+            eprintln!("yu: cannot determine the current user: {e}");
+            return false;
+        }
+    };
     eprintln!("yu: WARNING — this installs a passwordless sudo rule:");
-    eprintln!("yu:     {}", sudoers_rule(&exe_path));
+    eprintln!("yu:     {rule_preview}");
     eprintln!("yu: Because `{exe}` can run arbitrary code as root, this is");
     eprintln!("yu: effectively passwordless root for your account. It will be");
     eprintln!("yu: written to {SUDOERS_PATH}.");
@@ -126,9 +133,13 @@ pub fn setup_sudo(manager: &str) -> bool {
 
 /// Builds the sudoers line granting the current user passwordless access to
 /// `exe_path`.
-fn sudoers_rule(exe_path: &str) -> String {
-    let user = whoami::username();
-    format!("{user} ALL=(ALL) NOPASSWD: {exe_path}")
+///
+/// Fails if the current user can't be determined: writing a sudoers rule for the
+/// wrong (or empty) user is worse than not writing one, so the error is propagated
+/// rather than defaulted away. (whoami 2.x made `username()` fallible.)
+fn sudoers_rule(exe_path: &str) -> std::io::Result<String> {
+    let user = whoami::username().map_err(std::io::Error::other)?;
+    Ok(format!("{user} ALL=(ALL) NOPASSWD: {exe_path}"))
 }
 
 /// Installs the sudoers fragment safely:
@@ -141,7 +152,7 @@ pub fn setup_sudoers_rule(exe_path: &str) -> std::io::Result<()> {
     use std::io::Write;
     use std::process::Stdio;
 
-    let rule = format!("{}\n", sudoers_rule(exe_path));
+    let rule = format!("{}\n", sudoers_rule(exe_path)?);
 
     let mut tee = Command::new("sudo")
         .arg("tee")
@@ -239,7 +250,7 @@ mod tests {
 
     #[test]
     fn sudoers_rule_is_well_formed() {
-        let rule = sudoers_rule("/usr/bin/apt");
+        let rule = sudoers_rule("/usr/bin/apt").expect("current user should resolve");
         assert!(rule.contains(" ALL=(ALL) NOPASSWD: /usr/bin/apt"));
         assert!(!rule.contains('\n'));
     }
