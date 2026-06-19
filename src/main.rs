@@ -19,9 +19,10 @@ fn main() -> ExitCode {
         )
         .arg(
             Arg::new("package")
-                .help("The package to install or uninstall")
+                .help("The package(s) to install or uninstall")
                 .required(false)
-                .index(2),
+                .index(2)
+                .num_args(0..),
         )
         .arg(
             Arg::new("silent")
@@ -49,10 +50,11 @@ fn main() -> ExitCode {
         .get_one::<String>("command")
         .map(|s| s.as_str())
         .unwrap_or("upgrade");
-    let package = matches
-        .get_one::<String>("package")
+    let packages: Vec<String> = matches
+        .get_many::<String>("package")
+        .unwrap_or_default()
         .cloned()
-        .unwrap_or_default();
+        .collect();
     let silent = *matches.get_one::<bool>("silent").unwrap_or(&false);
     let verbose = *matches.get_one::<bool>("verbose").unwrap_or(&false);
 
@@ -75,7 +77,7 @@ fn main() -> ExitCode {
         // rejects as invalid).
         "autoremove" if package_manager == "zypper" => command::autoremove::run_zypper_autoremove(),
         other => match build_command(other, &package_manager) {
-            Some(raw) => run_package_command(raw, other, silent, verbose, &package),
+            Some(raw) => run_package_command(raw, other, silent, verbose, &packages),
             None => {
                 eprintln!("yu: unknown command: {other}");
                 ExitCode::FAILURE
@@ -107,15 +109,13 @@ fn build_command(command: &str, manager: &str) -> Option<SysCommand> {
 /// required, and spawns it, returning the child's exit status.
 fn execute(
     mut cmd: SysCommand,
-    package: &str,
+    packages: &[String],
     silent: bool,
     verbose: bool,
 ) -> std::io::Result<std::process::ExitStatus> {
     use std::process::Stdio;
 
-    if !package.is_empty() {
-        cmd.arg(package);
-    }
+    cmd.args(packages);
 
     let mut cmd = get_sudo(cmd);
 
@@ -137,9 +137,9 @@ fn run_package_command(
     action: &str,
     silent: bool,
     verbose: bool,
-    package: &str,
+    packages: &[String],
 ) -> ExitCode {
-    match execute(cmd, package, silent, verbose) {
+    match execute(cmd, packages, silent, verbose) {
         Ok(status) => {
             if status.success() {
                 if !silent {
@@ -201,14 +201,14 @@ mod tests {
     #[test]
     fn execute_spawns_and_reports_success() {
         // Actually launches a child process and observes its real exit status.
-        let status = execute(SysCommand::new("true"), "", true, false)
+        let status = execute(SysCommand::new("true"), &[], true, false)
             .expect("spawning `true` should not fail");
         assert!(status.success());
     }
 
     #[test]
     fn execute_spawns_and_reports_failure() {
-        let status = execute(SysCommand::new("false"), "", true, false)
+        let status = execute(SysCommand::new("false"), &[], true, false)
             .expect("spawning `false` should not fail");
         assert!(!status.success());
     }
@@ -217,15 +217,20 @@ mod tests {
     fn execute_appends_package_argument_and_still_spawns() {
         // `true` ignores its arguments, but the command must still spawn and
         // succeed once a package argument has been appended.
-        let status = execute(SysCommand::new("true"), "somepkg", true, false)
-            .expect("spawning `true somepkg` should not fail");
+        let status = execute(
+            SysCommand::new("true"),
+            &[String::from("somepkg")],
+            true,
+            false,
+        )
+        .expect("spawning `true somepkg` should not fail");
         assert!(status.success());
     }
 
     #[test]
     fn execute_surfaces_spawn_errors_instead_of_panicking() {
         // A binary that does not exist must yield an `Err`, not a panic.
-        let result = execute(SysCommand::new("yu-no-such-binary-xyz"), "", true, false);
+        let result = execute(SysCommand::new("yu-no-such-binary-xyz"), &[], true, false);
         assert!(result.is_err());
     }
 
@@ -242,7 +247,7 @@ mod tests {
         // are silently discarded and the child exits 0.
         let mut cmd = SysCommand::new("sh");
         cmd.args(["-c", "echo hello; echo error >&2"]);
-        let status = execute(cmd, "", true, false).expect("sh should spawn");
+        let status = execute(cmd, &[], true, false).expect("sh should spawn");
         assert!(status.success());
     }
 }
