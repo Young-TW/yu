@@ -52,6 +52,49 @@ fn unknown_subcommand_reports_an_error_without_crashing() {
 }
 
 #[test]
+fn silent_failing_command_emits_no_yu_output() {
+    // Regression test for issue #7: `--silent` must suppress *all* yu-originated
+    // output, including the failure diagnostic. Installing a package that cannot
+    // exist drives `run_package_command` down its non-success branch, which used
+    // to `eprintln!("yu: install failed")` unconditionally.
+    //
+    // Concrete example from the issue: `yu --silent install <nonexistent-pkg>`
+    // must exit non-zero and produce empty stdout + stderr.
+    let output = yu()
+        .arg("--silent")
+        .arg("install")
+        .arg("yu-nonexistent-pkg-zzz-7")
+        // Closed stdin so any `sudo` wrapper fails fast instead of prompting.
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to spawn yu");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    // On hosts with no recognised package manager, yu bails out before ever
+    // running the command, so the bug's code path is never exercised. Skip
+    // there rather than assert against an unrelated diagnostic.
+    if stderr.contains("unknown package manager") {
+        eprintln!("skipping: no package manager detected on this host");
+        return;
+    }
+
+    // A failing command under --silent must still report failure via the exit
+    // code...
+    assert!(
+        !output.status.success(),
+        "a failing install must exit non-zero"
+    );
+    // ...but must not print anything from yu itself.
+    assert!(stdout.is_empty(), "--silent leaked stdout: {stdout:?}");
+    assert!(
+        stderr.is_empty(),
+        "--silent leaked stderr (issue #7): {stderr:?}"
+    );
+}
+
+#[test]
 fn setup_sudo_makes_no_changes_without_confirmation() {
     // Closed stdin means the confirmation prompt reads EOF, so `setup-sudo`
     // must abort without ever installing a sudoers rule. This pins down the
