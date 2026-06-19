@@ -46,6 +46,15 @@ pub fn get_sudo(cmd: Command) -> Command {
     let mut sudo_cmd = Command::new("sudo");
     sudo_cmd.arg(&program_path);
     sudo_cmd.args(cmd.get_args());
+    // Carry over any environment configured on the original command. Rebuilding
+    // from scratch would otherwise silently drop vars like DEBIAN_FRONTEND that
+    // callers set to control the wrapped program's behaviour (issue #12).
+    for (key, value) in cmd.get_envs() {
+        match value {
+            Some(value) => sudo_cmd.env(key, value),
+            None => sudo_cmd.env_remove(key),
+        };
+    }
     sudo_cmd
 }
 
@@ -246,6 +255,37 @@ mod tests {
         // brew and unknown managers do not use sudo.
         assert_eq!(privileged_executable("brew"), None);
         assert_eq!(privileged_executable("unknown"), None);
+    }
+
+    #[test]
+    fn get_sudo_preserves_env_vars_set_on_the_wrapped_command() {
+        use std::ffi::OsStr;
+        use which::which;
+
+        // The bug (issue #12) only manifests when the command is actually
+        // wrapped with sudo, which requires a sudo binary on PATH. Without one,
+        // get_sudo returns the command unchanged, so there is nothing to drop
+        // and nothing meaningful to assert.
+        if which("sudo").is_err() {
+            return;
+        }
+
+        // `apt` needs elevation, so get_sudo will rebuild the command under sudo.
+        let mut cmd = Command::new("apt");
+        cmd.arg("install").arg("ripgrep");
+        cmd.env("DEBIAN_FRONTEND", "noninteractive");
+
+        let wrapped = get_sudo(cmd);
+
+        // Expected (correct) behaviour: an env var set before get_sudo must
+        // survive onto the sudo-wrapped command, not be silently discarded.
+        let preserved = wrapped.get_envs().any(|(k, v)| {
+            k == OsStr::new("DEBIAN_FRONTEND") && v == Some(OsStr::new("noninteractive"))
+        });
+        assert!(
+            preserved,
+            "DEBIAN_FRONTEND set before get_sudo should be preserved on the sudo-wrapped command"
+        );
     }
 
     #[test]
