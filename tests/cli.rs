@@ -95,6 +95,30 @@ fn silent_failing_command_emits_no_yu_output() {
 }
 
 #[test]
+fn multiple_packages_are_accepted_by_argument_parser() {
+    // Regression test for issue #10: `yu install foo bar` was rejected by clap
+    // with "unexpected argument 'bar' found" because `package` was declared as a
+    // single positional argument (index 2). After the fix, multiple package names
+    // must be accepted by the parser and forwarded to the underlying manager.
+    //
+    // This test only exercises the *parsing* layer: even if the install itself
+    // fails (no package manager detected, sudo required, packages not found),
+    // clap must not reject the second package name outright.
+    let output = yu()
+        .args(["install", "nonexistent-pkg-a", "nonexistent-pkg-b"])
+        .stdin(Stdio::null())
+        .output()
+        .expect("failed to spawn yu");
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        !stderr.contains("unexpected argument"),
+        "yu rejected the second package name at the CLI level (issue #10): {stderr}"
+    );
+}
+
+#[test]
 fn setup_sudo_makes_no_changes_without_confirmation() {
     // Closed stdin means the confirmation prompt reads EOF, so `setup-sudo`
     // must abort without ever installing a sudoers rule. This pins down the
