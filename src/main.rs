@@ -145,14 +145,16 @@ fn run_package_command(
                 if !silent {
                     println!("yu: {action} succeeded");
                 }
-            } else {
+            } else if !silent {
                 eprintln!("yu: {action} failed");
             }
             // Surface the child's own exit code so scripts can detect failure.
             ExitCode::from(exit_code(status))
         }
         Err(e) => {
-            eprintln!("yu: failed to {action}: {e}");
+            if !silent {
+                eprintln!("yu: failed to {action}: {e}");
+            }
             ExitCode::FAILURE
         }
     }
