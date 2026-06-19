@@ -29,7 +29,7 @@ pub fn self_upgrade(manager: &str) -> Result<Command, String> {
             cmd.args(["self", "update"]);
         }
         _ => {
-            return Err(format!("不支援的套件管理器：{}", manager));
+            return Err(format!("unsupported package manager: {}", manager));
         }
     }
 
@@ -93,5 +93,13 @@ mod tests {
     #[test]
     fn test_self_upgrade_unknown_is_err() {
         assert!(self_upgrade("unknown").is_err());
+    }
+
+    // Regression test for GitHub issue #11: the unsupported-manager error must be
+    // in English, consistent with the rest of the codebase (not Chinese).
+    #[test]
+    fn test_self_upgrade_unknown_error_is_english() {
+        let err = self_upgrade("unknown").unwrap_err();
+        assert_eq!(err, "unsupported package manager: unknown");
     }
 }
