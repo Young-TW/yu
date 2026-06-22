@@ -294,4 +294,19 @@ mod tests {
         assert!(rule.contains(" ALL=(ALL) NOPASSWD: /usr/bin/apt"));
         assert!(!rule.contains('\n'));
     }
+
+    #[test]
+    fn setup_sudo_returns_false_when_binary_not_on_path() {
+        use which::which;
+
+        // `apk` is Alpine Linux's package manager; it is absent on Debian/Ubuntu
+        // CI runners, making this a reliably absent binary in that environment.
+        // Skip on Alpine itself — there apk exists so which() succeeds and
+        // setup_sudo() would reach the interactive prompt, not the error path.
+        if which("apk").is_ok() {
+            return;
+        }
+
+        assert!(!setup_sudo("apk"));
+    }
 }
