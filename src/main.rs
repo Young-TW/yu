@@ -250,4 +250,57 @@ mod tests {
         let status = execute(cmd, &[], true, false).expect("sh should spawn");
         assert!(status.success());
     }
+
+    // ── issue #8: I/O suppression is actually applied ────────────────────────
+    //
+    // Each test has the child shell inspect its own fd via /proc/$$ (the
+    // shell's PID). $$ refers to the main shell process even inside a pipeline,
+    // so the pipeline's internal pipe does not interfere with the lookup.
+    // If Stdio::null() is wired correctly, /proc/$$/fd/1 (or fd/2) resolves to
+    // /dev/null. If Stdio::inherit() is wired correctly it resolves to whatever
+    // the test runner gave the test process (a pipe or terminal, not /dev/null).
+
+    #[test]
+    fn execute_silent_true_suppresses_stdout() {
+        let mut cmd = SysCommand::new("sh");
+        cmd.args(["-c", "readlink /proc/$$/fd/1 | grep -qF /dev/null"]);
+        let status = execute(cmd, &[], true, false).expect("sh should spawn");
+        assert!(
+            status.success(),
+            "child stdout should point to /dev/null when silent=true"
+        );
+    }
+
+    #[test]
+    fn execute_silent_true_suppresses_stderr() {
+        let mut cmd = SysCommand::new("sh");
+        cmd.args(["-c", "readlink /proc/$$/fd/2 | grep -qF /dev/null"]);
+        let status = execute(cmd, &[], true, false).expect("sh should spawn");
+        assert!(
+            status.success(),
+            "child stderr should point to /dev/null when silent=true"
+        );
+    }
+
+    #[test]
+    fn execute_silent_false_inherits_stdout() {
+        let mut cmd = SysCommand::new("sh");
+        cmd.args(["-c", "readlink /proc/$$/fd/1 | grep -qvF /dev/null"]);
+        let status = execute(cmd, &[], false, false).expect("sh should spawn");
+        assert!(
+            status.success(),
+            "child stdout should not be /dev/null when silent=false"
+        );
+    }
+
+    #[test]
+    fn execute_silent_false_inherits_stderr() {
+        let mut cmd = SysCommand::new("sh");
+        cmd.args(["-c", "readlink /proc/$$/fd/2 | grep -qvF /dev/null"]);
+        let status = execute(cmd, &[], false, false).expect("sh should spawn");
+        assert!(
+            status.success(),
+            "child stderr should not be /dev/null when silent=false"
+        );
+    }
 }
