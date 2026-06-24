@@ -13,6 +13,7 @@ pub fn gen_reinstall_syntax(manager: String) -> std::process::Command {
         }
         "zypper" => {
             command.arg("install");
+            command.arg("--force-reinstall");
             command.arg("-y");
         }
         "apk" => {
@@ -74,7 +75,7 @@ mod tests {
     fn test_gen_reinstall_syntax_zypper() {
         let cmd = gen_reinstall_syntax("zypper".to_string());
         let args = cmd_to_string(&cmd);
-        assert_eq!(args, vec!["zypper", "install", "-y"]);
+        assert_eq!(args, vec!["zypper", "install", "--force-reinstall", "-y"]);
     }
 
     #[test]
