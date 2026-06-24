@@ -50,9 +50,35 @@ pub fn pacman_remove_orphans_cmd(packages: &[&str]) -> Command {
 /// Two-step pacman autoremove: queries orphans then removes them.
 /// Exits 0 with no error when there are no orphans to remove.
 pub fn run_pacman_autoremove(silent: bool, verbose: bool) -> std::process::ExitCode {
+    if run_pacman_autoremove_impl(
+        silent,
+        verbose,
+        pacman_query_orphans_cmd,
+        pacman_remove_orphans_cmd,
+    ) {
+        std::process::ExitCode::SUCCESS
+    } else {
+        std::process::ExitCode::FAILURE
+    }
+}
+
+/// Injectable implementation used by `run_pacman_autoremove` and unit tests.
+/// Returns `true` on success, `false` on any failure.
+/// (`ExitCode` is opaque in stable Rust — no `PartialEq` — so tests work on
+/// the bool and the public wrapper converts it.)
+fn run_pacman_autoremove_impl<Q, R>(
+    silent: bool,
+    verbose: bool,
+    query_builder: Q,
+    remove_builder: R,
+) -> bool
+where
+    Q: FnOnce() -> Command,
+    R: FnOnce(&[&str]) -> Command,
+{
     use std::process::Stdio;
 
-    let mut query = pacman_query_orphans_cmd();
+    let mut query = query_builder();
     query.stdout(Stdio::piped());
     if silent {
         query.stderr(Stdio::null());
@@ -68,9 +94,14 @@ pub fn run_pacman_autoremove(silent: bool, verbose: bool) -> std::process::ExitC
         Ok(o) => o,
         Err(e) => {
             eprintln!("yu: failed to query orphans: {e}");
-            return std::process::ExitCode::FAILURE;
+            return false;
         }
     };
+
+    if !query_output.status.success() {
+        eprintln!("yu: orphan query exited {}", query_output.status);
+        return false;
+    }
 
     let stdout = String::from_utf8_lossy(&query_output.stdout);
     let packages: Vec<&str> = stdout.split_whitespace().collect();
@@ -79,10 +110,10 @@ pub fn run_pacman_autoremove(silent: bool, verbose: bool) -> std::process::ExitC
         if !silent {
             println!("yu: no orphan packages to remove");
         }
-        return std::process::ExitCode::SUCCESS;
+        return true;
     }
 
-    let mut remove = pacman_remove_orphans_cmd(&packages);
+    let mut remove = remove_builder(&packages);
 
     if silent {
         remove.stdout(Stdio::null()).stderr(Stdio::null());
@@ -102,15 +133,15 @@ pub fn run_pacman_autoremove(silent: bool, verbose: bool) -> std::process::ExitC
                 if !silent {
                     println!("yu: autoremove succeeded");
                 }
-                std::process::ExitCode::SUCCESS
+                true
             } else {
                 eprintln!("yu: autoremove failed");
-                std::process::ExitCode::from(status.code().map(|c| c as u8).unwrap_or(1))
+                false
             }
         }
         Err(e) => {
             eprintln!("yu: failed to autoremove: {e}");
-            std::process::ExitCode::FAILURE
+            false
         }
     }
 }
@@ -220,5 +251,30 @@ mod tests {
         let cmd = pacman_remove_orphans_cmd(&["only-orphan"]);
         let args = cmd_to_string(&cmd);
         assert_eq!(args, vec!["pacman", "-Rns", "--noconfirm", "only-orphan"]);
+    }
+
+    #[test]
+    fn test_run_pacman_autoremove_query_spawn_failure_returns_false() {
+        // Path 1: the query binary does not exist — output() returns Err.
+        let result = run_pacman_autoremove_impl(
+            true,
+            false,
+            || Command::new("/nonexistent/__yu_test_binary__"),
+            |_| panic!("remove_builder must not be called when query fails to spawn"),
+        );
+        assert!(!result, "spawn failure must return FAILURE");
+    }
+
+    #[test]
+    fn test_run_pacman_autoremove_query_nonzero_exit_returns_false() {
+        // Path 2: the query binary exists but exits non-zero.
+        // `false` is a POSIX standard utility guaranteed to exit 1.
+        let result = run_pacman_autoremove_impl(
+            true,
+            false,
+            || Command::new("false"),
+            |_| panic!("remove_builder must not be called when query exits non-zero"),
+        );
+        assert!(!result, "non-zero query exit must return FAILURE");
     }
 }
