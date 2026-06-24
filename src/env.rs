@@ -82,4 +82,31 @@ mod tests {
         let result = detect_with(|p| p == "/usr/bin/dnf" || p == "/usr/bin/yum");
         assert_eq!(result, "dnf");
     }
+
+    #[test]
+    fn apt_takes_priority_over_brew() {
+        for brew_path in [
+            "/opt/homebrew/bin/brew",
+            "/usr/local/bin/brew",
+            "/home/linuxbrew/.linuxbrew/bin/brew",
+        ] {
+            let result = detect_with(|p| p == "/usr/bin/apt" || p == brew_path);
+            assert_eq!(result, "apt", "expected apt to beat brew at {brew_path}");
+        }
+    }
+
+    #[test]
+    fn brew_takes_priority_over_pacman() {
+        for brew_path in [
+            "/opt/homebrew/bin/brew",
+            "/usr/local/bin/brew",
+            "/home/linuxbrew/.linuxbrew/bin/brew",
+        ] {
+            let result = detect_with(|p| p == brew_path || p == "/usr/bin/pacman");
+            assert_eq!(
+                result, "brew",
+                "expected brew at {brew_path} to beat pacman"
+            );
+        }
+    }
 }
